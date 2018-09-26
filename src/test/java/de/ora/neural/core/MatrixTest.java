@@ -1,5 +1,8 @@
 package de.ora.neural.core;
 
+import de.ora.neural.core.net.Matrix;
+import de.ora.neural.core.net.Vector;
+
 public class MatrixTest {
 
 
