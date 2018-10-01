@@ -4,17 +4,19 @@ import de.ora.neural.core.activation.ActivationFunction;
 
 public class Layer {
     private int inputLength;
+    private int outputLength;
     private Vector input; // activations
     private Matrix weights;
     private Vector biases;
-    private Vector output; // sigmoid result = s(Wa+b)
+    private Vector output; // activation result = s(Wa+b)
     private ActivationFunction activationFunction;
 
-    public Layer(int inputLength, int outputLength, ActivationFunction activationFunction) {
+    public Layer(int inputLength, int size, ActivationFunction activationFunction) {
         input = new Vector(inputLength);
-        weights = new Matrix(inputLength, outputLength).initRandom();
-        biases = new Vector(outputLength).initRandom();
+        weights = new Matrix(size, inputLength).initRandom();
+        biases = new Vector(size).initRandom();
         this.inputLength = inputLength;
+        this.outputLength = size;
         this.activationFunction = activationFunction;
     }
 
@@ -27,14 +29,18 @@ public class Layer {
      */
     public Vector propagate(Vector input) {
         if (inputLength != input.length) {
-            throw new IllegalArgumentException("Invalid input dimensions: expected " + inputLength + " was" + input.length);
+            throw new IllegalArgumentException("Invalid input dimensions: expected " + inputLength + " was " + input.length);
         }
         this.input = input;
-        this.output = sigmoid(weights.multiply(input).add(biases));
+        this.output = activation(weights.multiply(input).add(biases));
         return this.output;
     }
 
-    private Vector sigmoid(Vector input) {
+    public boolean isCompatibleTo(final Layer previous) {
+        return previous.outputLength == this.inputLength;
+    }
+
+    private Vector activation(Vector input) {
         Vector result = new Vector(input.length);
         for (int i = 0; i < result.length; i++) {
             result.data[i] = activationFunction.apply(input.data[i]);

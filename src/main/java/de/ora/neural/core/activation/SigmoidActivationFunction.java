@@ -23,7 +23,7 @@ public class SigmoidActivationFunction implements ActivationFunction {
     }
 
     @Override
-    public Matrix apply(Matrix input) {
+    public Matrix apply(final Matrix input) {
         Matrix result = input.copy();
         Matrix ones = new Matrix(result.getRows(), result.getColumns()).initOnes();
         result.multiply(-1);

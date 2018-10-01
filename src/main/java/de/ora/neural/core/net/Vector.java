@@ -6,7 +6,7 @@ public class Vector {
     double[] data;
     int length;
 
-    public Vector(double[] data) {
+    public Vector(double... data) {
         this.data = data;
         this.length = data.length;
     }
@@ -47,7 +47,7 @@ public class Vector {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            sb.append(data[i]).append("\n");
+            sb.append(data[i]).append(System.lineSeparator());
         }
         return sb.toString();
     }

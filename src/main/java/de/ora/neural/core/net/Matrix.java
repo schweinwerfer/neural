@@ -146,7 +146,7 @@ public class Matrix {
             for (int j = 0; j < columns; j++) {
                 sb.append(data[i][j]).append(" ");
             }
-            sb.append("\n");
+            sb.append(System.lineSeparator());
         }
         return sb.toString();
     }
