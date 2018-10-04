@@ -24,12 +24,15 @@ public class Matrix {
     }
 
     public Matrix initOnes() {
+        return initWith(1);
+    }
+
+    public Matrix initWith(double value) {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                data[i][j] = 1;
+                data[i][j] = value;
             }
         }
-
         return this;
     }
 
@@ -75,6 +78,16 @@ public class Matrix {
     }
 
     /**
+     * Elementwise multiplication
+     *
+     * @param input
+     * @return
+     */
+    public Matrix elemMultiply(final Matrix input) {
+        return null;
+    }
+
+    /**
      * Applies the exponential function element wise.
      */
     public void exp() {
@@ -112,7 +125,29 @@ public class Matrix {
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                data[i][j] = data[i][j] / input.data[i][j];
+                result.data[i][j] = data[i][j] / input.data[i][j];
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Matrix subtraction
+     *
+     * @param input
+     * @return
+     */
+    public Matrix subtract(final Matrix input) {
+        if (!dimensionsMatch(input)) {
+            throw new IllegalArgumentException("Dimensions do not match: expected rows " + rows + " found " + input.rows + ", expected columns " + columns + " found " + input.columns);
+        }
+
+        Matrix result = new Matrix(rows, columns);
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                result.data[i][j] = data[i][j] - input.data[i][j];
             }
         }
 

@@ -39,6 +39,37 @@ public class Vector {
         return new Vector(result);
     }
 
+    public Vector subtract(final Vector input) {
+        if (length != input.length) {
+            throw new IllegalArgumentException("Invalid input dimensions: expected " + length + " was" + input.length);
+        }
+
+        double[] result = new double[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = data[i] - input.data[i];
+        }
+
+        return new Vector(result);
+    }
+
+    public Vector pow(double exponent) {
+        double[] result = new double[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = Math.pow(data[i], exponent);
+        }
+
+        return new Vector(result);
+    }
+
+    public double sumElements() {
+        double result = 0;
+        for (int i = 0; i < length; i++) {
+            result += data[i];
+        }
+
+        return result;
+    }
+
     public int getLength() {
         return length;
     }
@@ -51,4 +82,6 @@ public class Vector {
         }
         return sb.toString();
     }
+
+
 }

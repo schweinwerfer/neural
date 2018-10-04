@@ -18,8 +18,11 @@ public class NetTest {
 
         net = new Net()
                 .addLayer(new Layer(2, 10, new SigmoidActivationFunction()))
-                .addLayer(new Layer(10, 5, new RectifiedLinearUnitsActivationFunction()));
+                .addLayer(new Layer(10, 5, new RectifiedLinearUnitsActivationFunction()))
+                .addLayer(new Layer(5, 1, new SigmoidActivationFunction()));
 
         result = net.propagate(new Vector(1, 0));
+
+        final double cost = net.train(new Vector(1, 0), new Vector(1));
     }
 }

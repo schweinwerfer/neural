@@ -31,4 +31,17 @@ public class SigmoidActivationFunction implements ActivationFunction {
         result.add(1);
         return ones.divide(result);
     }
+
+    @Override
+    public Matrix gradient(final Matrix input) {
+        Matrix result = input.copy();
+        Matrix ones = new Matrix(result.getRows(), result.getColumns()).initOnes();
+        return result.elemMultiply(ones.subtract(result));
+    }
+
+    @Override
+    public double derivate(double input) {
+        double sigma = apply(input);
+        return sigma * (1 - sigma);
+    }
 }

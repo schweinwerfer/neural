@@ -17,4 +17,16 @@ public class IdentityActivationFunction implements ActivationFunction {
     public Matrix apply(final Matrix input) {
         return input;
     }
+
+    @Override
+    public Matrix gradient(Matrix input) {
+        return new Matrix(input.getRows(), input.getColumns()).initWith(1);
+    }
+
+    @Override
+    public double derivate(double input) {
+        return 1;
+    }
+
+
 }
