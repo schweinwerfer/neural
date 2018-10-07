@@ -84,7 +84,14 @@ public class Matrix {
      * @return
      */
     public Matrix elemMultiply(final Matrix input) {
-        return null;
+        assertDimensionsMatch(input);
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                data[i][j] *= input.data[i][j];
+            }
+        }
+        return this;
     }
 
     /**
@@ -118,9 +125,7 @@ public class Matrix {
      * @return
      */
     public Matrix divide(Matrix input) {
-        if (!dimensionsMatch(input)) {
-            throw new IllegalArgumentException("Dimensions do not match: expected rows " + rows + " found " + input.rows + ", expected columns " + columns + " found " + input.columns);
-        }
+        assertDimensionsMatch(input);
         Matrix result = new Matrix(rows, columns);
 
         for (int i = 0; i < rows; i++) {
@@ -132,6 +137,7 @@ public class Matrix {
         return result;
     }
 
+
     /**
      * Matrix subtraction
      *
@@ -139,9 +145,7 @@ public class Matrix {
      * @return
      */
     public Matrix subtract(final Matrix input) {
-        if (!dimensionsMatch(input)) {
-            throw new IllegalArgumentException("Dimensions do not match: expected rows " + rows + " found " + input.rows + ", expected columns " + columns + " found " + input.columns);
-        }
+        assertDimensionsMatch(input);
 
         Matrix result = new Matrix(rows, columns);
 
@@ -186,5 +190,10 @@ public class Matrix {
         return sb.toString();
     }
 
+    private void assertDimensionsMatch(Matrix input) {
+        if (!dimensionsMatch(input)) {
+            throw new IllegalArgumentException("Dimensions do not match: expected rows " + rows + " found " + input.rows + ", expected columns " + columns + " found " + input.columns);
+        }
+    }
 
 }
