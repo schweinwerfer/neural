@@ -38,7 +38,7 @@ public class Net {
     public double train(final Vector input, final Vector expectedOutput) {
         final Vector output = propagate(input);
         Vector costVector = output.subtract(expectedOutput).pow(2);
-        currentCost = costVector.sumElements();
+        currentCost = costVector.sumElements() * 0.5;
 
 
         return currentCost;

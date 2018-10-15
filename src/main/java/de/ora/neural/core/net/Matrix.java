@@ -137,7 +137,6 @@ public class Matrix {
         return result;
     }
 
-
     /**
      * Matrix subtraction
      *
