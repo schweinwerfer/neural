@@ -26,10 +26,10 @@ public class SigmoidActivationFunction implements ActivationFunction {
     public Matrix apply(final Matrix input) {
         Matrix result = input.copy();
         Matrix ones = new Matrix(result.getRows(), result.getColumns()).initOnes();
-        result.multiply(-1);
-        result.exp();
-        result.add(1);
-        return ones.divide(result);
+        result.multiply(-1); // -x
+        result.exp(); // e^(-x)
+        result.add(1);// 1 + e^(-x)
+        return ones.divide(result); // 1 / (1 + e^(-x))
     }
 
     @Override

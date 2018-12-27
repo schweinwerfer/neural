@@ -4,13 +4,13 @@ import de.ora.neural.core.activation.ActivationFunction;
 
 public class Layer {
     private int inputLength;
-    private int outputLength;
+    protected int outputLength;
     private Vector input; // last input from the previous layer
     private Matrix weights;
-    private Vector biases;
-    private Vector weightedInput; // z = Wa+b of this layer before application of applyActivation function
-    private Vector output; // applyActivation result a = s(Wa+b)
-    private ActivationFunction activationFunction;
+    protected Vector biases;
+    protected Vector weightedInput; // z = Wa+b of this layer before application of applyActivation function
+    protected Vector output; // applyActivation result a = s(Wa+b)
+    protected ActivationFunction activationFunction;
 
 
     public Layer(int inputLength, int size, ActivationFunction activationFunction) {
@@ -39,21 +39,7 @@ public class Layer {
         return this.output;
     }
 
-    /**
-     * Calcs cost of this layer for one concrete input
-     */
-    public double calcCost(final Vector expected) {
-        if (outputLength != expected.length) {
-            throw new IllegalArgumentException("Invalid output dimensions: expected " + outputLength + " was " + expected.length);
-        }
 
-        double cost = 0;
-        for (int i = 0; i < outputLength; i++) {
-            cost += Math.pow(output.data[i] - expected.data[i], 2);
-        }
-
-        return cost * 0.5;
-    }
 
     public boolean isCompatibleTo(final Layer previous) {
         return previous.outputLength == this.inputLength;
@@ -72,19 +58,7 @@ public class Layer {
     }
 
 
-    /**
-     * Only applicable for the output layer:
-     * Calculate the error of each neuron in this layer
-     * δL = (aL−y) ⊙ σ′(zL)  [BP1]
-     */
-    private Vector derivateCostForWeights(final Vector expected) {
-        Vector result = new Vector(biases.length);
-        for (int i = 0; i < result.length; i++) {
-            result.data[i] = (output.data[i] - expected.data[i]) * activationFunction.derivate(weightedInput.data[i]);
-        }
 
-        return result;
-    }
 
 
 }
