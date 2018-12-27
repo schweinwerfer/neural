@@ -76,4 +76,7 @@ public class Net {
         return error;
     }
 
+    public void setLearningRate(double learningRate) {
+        this.learningRate = learningRate;
+    }
 }

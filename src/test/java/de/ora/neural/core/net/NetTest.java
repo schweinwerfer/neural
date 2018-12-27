@@ -11,6 +11,8 @@ import java.util.Random;
 public class NetTest {
 
 
+    private Random rnd = new Random();
+
     @Test
     public void propagate() {
 
@@ -20,7 +22,7 @@ public class NetTest {
                 .addOutputLayer(new OutputLayer(2, 1, new SigmoidActivationFunction()));
 
         Map<Vector, Vector> trainingSet = new HashMap<>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10000; i++) {
             Vector randomInput = randomInput(4);
             double expected = xor(randomInput);
             trainingSet.put(randomInput, new Vector(expected));
@@ -28,7 +30,7 @@ public class NetTest {
 
         double error = 1;
 
-        while (error > 0.0001) {
+        while (error > 0.001) {
             for (Map.Entry<Vector, Vector> entry : trainingSet.entrySet()) {
                 error = net.train(entry.getKey(), entry.getValue());
             }
@@ -36,7 +38,7 @@ public class NetTest {
     }
 
     private Vector randomInput(int size) {
-        Random rnd = new Random();
+
         Vector result = new Vector(size);
 
         for (int i = 0; i < size; i++) {
