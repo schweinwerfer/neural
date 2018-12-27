@@ -3,8 +3,9 @@ package de.ora.neural.core.net;
 import de.ora.neural.core.activation.ActivationFunction;
 
 public class Layer {
-    private int inputLength;
-    protected int outputLength;
+    protected int inputLength;
+    protected int neurons;
+    protected Vector errorSignificances; // for each neuron: (activation function gradient) * (error of output)
     private Vector input; // last input from the previous layer
     private Matrix weights;
     protected Vector biases;
@@ -13,12 +14,12 @@ public class Layer {
     protected ActivationFunction activationFunction;
 
 
-    public Layer(int inputLength, int size, ActivationFunction activationFunction) {
+    public Layer(int inputLength, int neurons, ActivationFunction activationFunction) {
         input = new Vector(inputLength);
-        weights = new Matrix(size, inputLength).initRandom();
-        biases = new Vector(size).initRandom();
+        weights = new Matrix(neurons, inputLength).initRandom();
+        biases = new Vector(neurons).initRandom();
         this.inputLength = inputLength;
-        this.outputLength = size;
+        this.neurons = neurons;
         this.activationFunction = activationFunction;
     }
 
@@ -42,7 +43,7 @@ public class Layer {
 
 
     public boolean isCompatibleTo(final Layer previous) {
-        return previous.outputLength == this.inputLength;
+        return previous.neurons == this.inputLength;
     }
 
     /**
@@ -57,8 +58,33 @@ public class Layer {
         return result;
     }
 
+    /**
+     * Get the output error sum for each previous neuron (=input for this neuron)
+     */
+    public Vector calcInputErrors(final Vector errorSignificances) {
+        Vector result = new Vector(inputLength);
+        for (int i = 0; i < inputLength; i++) {
 
+            Vector incomingWeights = weights.getColumn(i); // get all incoming weights to current node
+            double inputError = 0;
+            for (int j = 0; j < incomingWeights.length; j++) {
+                inputError += incomingWeights.data[j] * errorSignificances.data[j];
+            }
 
+            result.data[i] = inputError;
+        }
 
+        return result;
+    }
+
+    public void adapt(double learningRate) {
+        weights.applyOnEachElement(new MatrixElementFunction() {
+            @Override
+            public double transform(double input, int row, int column) {
+                double adaptation = (-1) * learningRate * output.data[row] * errorSignificances.data[row];
+                return adaptation + input;
+            }
+        });
+    }
 
 }

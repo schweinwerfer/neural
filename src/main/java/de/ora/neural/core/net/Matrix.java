@@ -158,11 +158,20 @@ public class Matrix {
     }
 
     public void applyOnEachElement(final MatrixElementFunction function) {
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                data[i][j] = function.transform(data[i][j]);
+        for (int row = 0; row < rows; row++) {
+            for (int column = 0; column < columns; column++) {
+                data[row][column] = function.transform(data[row][column], row, column);
             }
         }
+    }
+
+    public Vector getColumn(int column) {
+        Vector result = new Vector(rows);
+        for (int i = 0; i < rows; i++) {
+            result.data[i] = data[i][column];
+        }
+
+        return result;
     }
 
     public int getRows() {

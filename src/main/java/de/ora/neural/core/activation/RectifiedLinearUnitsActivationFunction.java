@@ -14,7 +14,7 @@ public class RectifiedLinearUnitsActivationFunction implements ActivationFunctio
         Matrix result = input.copy();
         result.applyOnEachElement(new MatrixElementFunction() {
             @Override
-            public double transform(double input) {
+            public double transform(double input, int row, int column) {
                 return 0 > input ? 0 : input;
             }
         });
@@ -27,7 +27,7 @@ public class RectifiedLinearUnitsActivationFunction implements ActivationFunctio
         Matrix result = input.copy();
         result.applyOnEachElement(new MatrixElementFunction() {
             @Override
-            public double transform(double input) {
+            public double transform(double input, int row, int column) {
                 return input >= 0 ? 1 : 0;
             }
         });
