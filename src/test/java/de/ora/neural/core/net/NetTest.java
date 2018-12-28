@@ -16,7 +16,7 @@ public class NetTest {
     @Test
     public void propagate() {
 
-        Net net = new Net(0.05)
+        Net net = new Net(0.15)
                 .addHiddenLayer(new HiddenLayer(4, 3, new SigmoidActivationFunction()))
                 .addHiddenLayer(new HiddenLayer(3, 2, new SigmoidActivationFunction()))
                 .addOutputLayer(new OutputLayer(2, 1, new SigmoidActivationFunction()));
@@ -47,17 +47,15 @@ public class NetTest {
     }
 
     private double xor(Vector input) {
-        Boolean result = null;
+        int oneCnt = 0;
         for (Double value : input.data) {
-            boolean boolValue = value.intValue() == 0 ? false : true;
-            if (result == null) {
-                result = boolValue;
-            } else {
-                result ^= boolValue;
+            boolean boolValue = value.intValue() != 0;
+            if (boolValue) {
+                oneCnt++;
             }
         }
 
-        return result ? 1 : 0;
+        return oneCnt == 1 ? 1.0 : 0.0;
     }
 
 }
