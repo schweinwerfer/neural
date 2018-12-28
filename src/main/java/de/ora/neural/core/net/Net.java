@@ -1,8 +1,6 @@
 package de.ora.neural.core.net;
 
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class Net {
@@ -11,6 +9,7 @@ public class Net {
     Deque<HiddenLayer> layers = new LinkedList<>();
     private OutputLayer outputLayer;
     private double error;
+    private int trainingEpoch = 0;
 
     public Net(double learningRate) {
         this.learningRate = learningRate;
@@ -52,10 +51,32 @@ public class Net {
         return nextInput;
     }
 
-    public double train(final Vector input, final Vector expectedOutput) {
+    public double train(final List<TrainingData> trainingData) {
+        cleanupOldTrainingData();
+
+        double error = 0;
+
+        for (TrainingData trainingDatum : trainingData) {
+            error += train(trainingDatum.getInput(), trainingDatum.getExpectedOutput());
+        }
+
+        trainingEpoch++;
+
+        this.error = error / trainingData.size();
+        LOG.info(String.format("Current avg error %.10f for epoch %s", this.error, trainingEpoch));
+        return this.error;
+    }
+
+    private void cleanupOldTrainingData() {
+        for (HiddenLayer layer : layers) {
+            layer.cleanup();
+        }
+        this.outputLayer.cleanup();
+    }
+
+    private double train(final Vector input, final Vector expectedOutput) {
         propagate(input);
-        error = outputLayer.error(expectedOutput);
-        LOG.info(String.format("Current error: %s", error));
+        double error = outputLayer.error(expectedOutput);
         Vector errorSignificance = outputLayer.calcErrorSignificance(expectedOutput);
 
         Vector inputErrors = outputLayer.calcInputErrors(errorSignificance);

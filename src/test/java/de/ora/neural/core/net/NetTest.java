@@ -3,8 +3,8 @@ package de.ora.neural.core.net;
 import de.ora.neural.core.activation.SigmoidActivationFunction;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
@@ -21,19 +21,17 @@ public class NetTest {
                 .addHiddenLayer(new HiddenLayer(3, 2, new SigmoidActivationFunction()))
                 .addOutputLayer(new OutputLayer(2, 1, new SigmoidActivationFunction()));
 
-        Map<Vector, Vector> trainingSet = new HashMap<>();
+        List<TrainingData> trainingData = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
             Vector randomInput = randomInput(4);
             double expected = xor(randomInput);
-            trainingSet.put(randomInput, new Vector(expected));
+            trainingData.add(new TrainingData(randomInput, new Vector(expected)));
         }
 
         double error = 1;
 
         while (error > 0.001) {
-            for (Map.Entry<Vector, Vector> entry : trainingSet.entrySet()) {
-                error = net.train(entry.getKey(), entry.getValue());
-            }
+            error = net.train(trainingData);
         }
     }
 
@@ -50,11 +48,13 @@ public class NetTest {
 
     private double xor(Vector input) {
         Boolean result = null;
-        for (double value : input.data) {
+        for (Double value : input.data) {
+            boolean boolValue = value.intValue() == 0 ? false : true;
             if (result == null) {
-                result = Boolean.getBoolean(value + "");
+                result = boolValue;
+            } else {
+                result ^= boolValue;
             }
-            result ^= Boolean.getBoolean(value + "");
         }
 
         return result ? 1 : 0;

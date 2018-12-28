@@ -7,8 +7,8 @@ public class Layer {
     protected int neurons;
     protected Vector errorSignificances; // for each neuron: (activation function gradient) * (error of output)
     private Vector input; // last input from the previous layer
-    private Matrix weights;
-    protected Vector biases;
+    private Matrix weights; // W
+    protected Vector biases; // b
     protected Vector weightedInput; // z = Wa+b of this layer before application of applyActivation function
     protected Vector output; // applyActivation result a = s(Wa+b)
     protected ActivationFunction activationFunction;
@@ -39,7 +39,6 @@ public class Layer {
         this.output = applyActivation(weightedInput);
         return this.output;
     }
-
 
 
     public boolean isCompatibleTo(final Layer previous) {
@@ -87,4 +86,9 @@ public class Layer {
         });
     }
 
+    public void cleanup() {
+        this.input = null;
+        this.weightedInput = null;
+        this.errorSignificances = null;
+    }
 }
