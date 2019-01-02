@@ -16,46 +16,26 @@ public class NetTest {
     @Test
     public void propagate() {
 
-        Net net = new Net(0.15)
-                .addHiddenLayer(new HiddenLayer(4, 3, new SigmoidActivationFunction()))
-                .addHiddenLayer(new HiddenLayer(3, 2, new SigmoidActivationFunction()))
+        Net net = new Net(0.01)
+                .addHiddenLayer(new HiddenLayer(2, 2, new SigmoidActivationFunction()))
                 .addOutputLayer(new OutputLayer(2, 1, new SigmoidActivationFunction()));
 
-        List<TrainingData> trainingData = new ArrayList<>();
-        for (int i = 0; i < 10000; i++) {
-            Vector randomInput = randomInput(4);
-            double expected = xor(randomInput);
-            trainingData.add(new TrainingData(randomInput, new Vector(expected)));
-        }
+        List<TrainingData> trainingSet = new ArrayList<>();
+        trainingSet.add(new TrainingData(new Vector(0, 0), new Vector(0.0)));
+        trainingSet.add(new TrainingData(new Vector(0, 1), new Vector(1.0)));
+        trainingSet.add(new TrainingData(new Vector(1, 0), new Vector(1.0)));
+        trainingSet.add(new TrainingData(new Vector(1, 1), new Vector(0.0)));
 
         double error = 1;
 
         while (error > 0.001) {
-            error = net.train(trainingData);
-        }
-    }
-
-    private Vector randomInput(int size) {
-
-        Vector result = new Vector(size);
-
-        for (int i = 0; i < size; i++) {
-            result.data[i] = rnd.nextBoolean() ? 1 : 0;
-        }
-
-        return result;
-    }
-
-    private double xor(Vector input) {
-        int oneCnt = 0;
-        for (Double value : input.data) {
-            boolean boolValue = value.intValue() != 0;
-            if (boolValue) {
-                oneCnt++;
+            error = net.train(trainingSet);
+            if (net.getTrainingEpoch() % 1000 == 0) {
+                System.out.println("0,0 -> " + net.propagate(new Vector(0, 0)));
+                System.out.println("1,0 -> " + net.propagate(new Vector(1, 0)));
+                System.out.println("0,1 -> " + net.propagate(new Vector(0, 1)));
+                System.out.println("1,1 -> " + net.propagate(new Vector(1, 1)));
             }
         }
-
-        return oneCnt == 1 ? 1.0 : 0.0;
     }
-
 }

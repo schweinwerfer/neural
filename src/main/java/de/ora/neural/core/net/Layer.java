@@ -13,7 +13,6 @@ public class Layer {
     protected Vector output; // applyActivation result a = s(Wa+b)
     protected ActivationFunction activationFunction;
 
-
     public Layer(int inputLength, int neurons, ActivationFunction activationFunction) {
         input = new Vector(inputLength);
         weights = new Matrix(neurons, inputLength).initRandom();
@@ -21,6 +20,11 @@ public class Layer {
         this.inputLength = inputLength;
         this.neurons = neurons;
         this.activationFunction = activationFunction;
+    }
+
+    public void setTestMode() {
+        weights = new Matrix(neurons, inputLength).initOnes();
+        biases = new Vector(neurons).initWith(1.0);
     }
 
 
@@ -80,8 +84,8 @@ public class Layer {
         weights.applyOnEachElement(new MatrixElementFunction() {
             @Override
             public double transform(double input, int row, int column) {
-                double adaptation = (-1) * learningRate * output.data[row] * errorSignificances.data[row];
-                return adaptation + input;
+                double adaptation = learningRate * output.data[row] * errorSignificances.data[row];
+                return input - adaptation;
             }
         });
     }

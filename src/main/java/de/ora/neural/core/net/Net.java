@@ -52,7 +52,7 @@ public class Net {
     }
 
     public double train(final List<TrainingData> trainingData) {
-        cleanupOldTrainingData();
+//        cleanupOldTrainingData();
 
         double error = 0;
 
@@ -74,8 +74,8 @@ public class Net {
         this.outputLayer.cleanup();
     }
 
-    private double train(final Vector input, final Vector expectedOutput) {
-        propagate(input);
+    double train(final Vector input, final Vector expectedOutput) {
+        Vector result = propagate(input);
         double error = outputLayer.error(expectedOutput);
         Vector errorSignificance = outputLayer.calcErrorSignificance(expectedOutput);
 
@@ -99,5 +99,9 @@ public class Net {
 
     public void setLearningRate(double learningRate) {
         this.learningRate = learningRate;
+    }
+
+    public int getTrainingEpoch() {
+        return trainingEpoch;
     }
 }

@@ -84,4 +84,11 @@ public class Vector {
     }
 
 
+    public Vector initWith(double value) {
+        for (int i = 0; i < length; i++) {
+            data[i] = value;
+        }
+
+        return this;
+    }
 }

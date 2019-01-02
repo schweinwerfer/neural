@@ -3,7 +3,7 @@ package de.ora.neural.core.net;
 import java.util.Random;
 
 public class Matrix {
-    double[][] data;
+    public double[][] data;
     int rows;
     int columns;
 
