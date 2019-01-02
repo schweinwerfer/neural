@@ -11,17 +11,14 @@ public class OutputLayer extends Layer {
     /**
      * Calcs output error of the output layer for one concrete input
      */
-    public double error(final Vector expected) {
+    public Vector error(final Vector expected) {
         if (neurons != expected.length) {
             throw new IllegalArgumentException("Invalid output dimensions: expected " + neurons + " was " + expected.length);
         }
 
-        double cost = 0;
-        for (int i = 0; i < neurons; i++) {
-            cost += Math.pow(output.data[i] - expected.data[i], 2);
-        }
+        Vector result = new Vector(this.output.length);
 
-        return cost * 0.5;
+        return expected.subtract(this.output).pow(2);
     }
 
     /**
@@ -30,9 +27,10 @@ public class OutputLayer extends Layer {
     public Vector calcErrorSignificance(final Vector expected) {
         Vector result = new Vector(neurons);
         for (int i = 0; i < result.length; i++) {
-            double gradient = activationFunction.derivate(weightedInput.data[i]);
+            double gradient1 = output.data[i] * (1 - output.data[i]);
+//            double gradient = activationFunction.derivate(weightedInput.data[i]);
             double error = output.data[i] - expected.data[i];
-            result.data[i] = error * gradient;
+            result.data[i] = error * gradient1;
         }
 
         this.errorSignificances = result;

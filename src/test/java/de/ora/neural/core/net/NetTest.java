@@ -18,7 +18,8 @@ public class NetTest {
 
         Net net = new Net(0.01)
                 .addHiddenLayer(new HiddenLayer(2, 2, new SigmoidActivationFunction()))
-                .addOutputLayer(new OutputLayer(2, 1, new SigmoidActivationFunction()));
+                .addHiddenLayer(new HiddenLayer(2, 3, new SigmoidActivationFunction()))
+                .addOutputLayer(new OutputLayer(3, 1, new SigmoidActivationFunction()));
 
         List<TrainingData> trainingSet = new ArrayList<>();
         trainingSet.add(new TrainingData(new Vector(0, 0), new Vector(0.0)));
@@ -28,7 +29,7 @@ public class NetTest {
 
         double error = 1;
 
-        while (error > 0.001) {
+        while (error > 0.01) {
             error = net.train(trainingSet);
             if (net.getTrainingEpoch() % 1000 == 0) {
                 System.out.println("0,0 -> " + net.propagate(new Vector(0, 0)));
@@ -37,5 +38,10 @@ public class NetTest {
                 System.out.println("1,1 -> " + net.propagate(new Vector(1, 1)));
             }
         }
+
+        System.out.println("0,0 -> " + net.propagate(new Vector(0, 0)));
+        System.out.println("1,0 -> " + net.propagate(new Vector(1, 0)));
+        System.out.println("0,1 -> " + net.propagate(new Vector(0, 1)));
+        System.out.println("1,1 -> " + net.propagate(new Vector(1, 1)));
     }
 }

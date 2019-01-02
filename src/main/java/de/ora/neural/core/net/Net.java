@@ -1,6 +1,9 @@
 package de.ora.neural.core.net;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Net {
@@ -8,7 +11,7 @@ public class Net {
     public double learningRate = 0.05;
     Deque<HiddenLayer> layers = new LinkedList<>();
     private OutputLayer outputLayer;
-    private double error;
+    private double avgError;
     private int trainingEpoch = 0;
 
     public Net(double learningRate) {
@@ -52,19 +55,31 @@ public class Net {
     }
 
     public double train(final List<TrainingData> trainingData) {
-//        cleanupOldTrainingData();
+        cleanupOldTrainingData();
 
-        double error = 0;
+        Vector quadraticError = null;
 
         for (TrainingData trainingDatum : trainingData) {
-            error += train(trainingDatum.getInput(), trainingDatum.getExpectedOutput());
+            Vector error = train(trainingDatum.getInput(), trainingDatum.getExpectedOutput());
+            if (quadraticError == null) {
+                quadraticError = error;
+            } else {
+                quadraticError = quadraticError.add(error);
+            }
+
         }
 
         trainingEpoch++;
 
-        this.error = error / trainingData.size();
-        LOG.info(String.format("Current avg error %.10f for epoch %s", this.error, trainingEpoch));
-        return this.error;
+        quadraticError = quadraticError.multiply(0.5);
+
+        this.avgError = 0;
+        for (double datum : quadraticError.data) {
+            this.avgError += datum;
+        }
+        this.avgError = this.avgError / quadraticError.length;
+        LOG.info(String.format("Current avg quadraticError %.10f for epoch %s", this.avgError, trainingEpoch));
+        return this.avgError;
     }
 
     private void cleanupOldTrainingData() {
@@ -74,9 +89,9 @@ public class Net {
         this.outputLayer.cleanup();
     }
 
-    double train(final Vector input, final Vector expectedOutput) {
+    Vector train(final Vector input, final Vector expectedOutput) {
         Vector result = propagate(input);
-        double error = outputLayer.error(expectedOutput);
+        Vector error = outputLayer.error(expectedOutput);
         Vector errorSignificance = outputLayer.calcErrorSignificance(expectedOutput);
 
         Vector inputErrors = outputLayer.calcInputErrors(errorSignificance);

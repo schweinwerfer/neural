@@ -28,7 +28,7 @@ public class NetTestDetail {
         trainingSet.add(new TrainingData(new Vector(1, 1), new Vector(0.0)));
 
         Vector result = net.propagate(new Vector(0, 1));
-        double error = net.train(new Vector(0, 1), new Vector(1.0));
+        Vector error = net.train(new Vector(0, 1), new Vector(1.0));
         result = net.propagate(new Vector(0, 1));
 
     }

@@ -91,4 +91,18 @@ public class Vector {
 
         return this;
     }
+
+    public Vector multiply(double value) {
+        for (int i = 0; i < length; i++) {
+            data[i] = data[i] * value;
+        }
+
+        return this;
+    }
+
+    public void applyOnEachElement(final VectorElementFunction function) {
+        for (int i = 0; i < length; i++) {
+                data[i] = function.transform(data[i], i);
+        }
+    }
 }

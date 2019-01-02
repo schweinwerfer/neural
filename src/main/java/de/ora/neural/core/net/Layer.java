@@ -84,8 +84,16 @@ public class Layer {
         weights.applyOnEachElement(new MatrixElementFunction() {
             @Override
             public double transform(double input, int row, int column) {
-                double adaptation = learningRate * output.data[row] * errorSignificances.data[row];
-                return input - adaptation;
+                double adaptation = (-1) * learningRate * errorSignificances.data[row] * output.data[row];
+                return input + adaptation;
+            }
+        });
+
+        biases.applyOnEachElement(new VectorElementFunction() {
+            @Override
+            public double transform(double data, int index) {
+                double adaptation = (-1) * learningRate * errorSignificances.data[index];
+                return data + adaptation;
             }
         });
     }
