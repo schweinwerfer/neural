@@ -24,7 +24,7 @@ public class OutputLayer extends Layer {
     /**
      * Calculates the intensity of error of each neuron of this layer.
      */
-    public Vector calcErrorSignificance(final Vector expected) {
+    public Vector calcLayerErrorSignal(final Vector expected) {
         Vector result = new Vector(neurons);
         for (int i = 0; i < result.length; i++) {
             double gradient1 = output.data[i] * (1 - output.data[i]);
@@ -33,7 +33,7 @@ public class OutputLayer extends Layer {
             result.data[i] = error * gradient1;
         }
 
-        this.errorSignificances = result;
+        this.layerErrorSignal = result;
         return result;
     }
 

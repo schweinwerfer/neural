@@ -5,7 +5,7 @@ import de.ora.neural.core.activation.ActivationFunction;
 public class Layer {
     protected int inputLength;
     protected int neurons;
-    protected Vector errorSignificances; // for each neuron: (activation function gradient) * (error of output)
+    protected Vector layerErrorSignal; // for each neuron: (activation function gradient) * (error of output)
     private Vector input; // last input from the previous layer
     private Matrix weights; // W
     protected Vector biases; // b
@@ -64,14 +64,14 @@ public class Layer {
     /**
      * Get the output error sum for each previous neuron (=input for this neuron)
      */
-    public Vector calcInputErrors(final Vector errorSignificances) {
+    public Vector calcInputErrors(final Vector layerErrorSignals) {
         Vector result = new Vector(inputLength);
         for (int i = 0; i < inputLength; i++) {
 
             Vector incomingWeights = weights.getColumn(i); // get all incoming weights to current node
             double inputError = 0;
             for (int j = 0; j < incomingWeights.length; j++) {
-                inputError += incomingWeights.data[j] * errorSignificances.data[j];
+                inputError += incomingWeights.data[j] * layerErrorSignals.data[j];
             }
 
             result.data[i] = inputError;
@@ -83,16 +83,16 @@ public class Layer {
     public void adapt(double learningRate) {
         weights.applyOnEachElement(new MatrixElementFunction() {
             @Override
-            public double transform(double input, int row, int column) {
-                double adaptation = (-1) * learningRate * errorSignificances.data[row] * output.data[row];
-                return input + adaptation;
+            public double transform(double value, int neuron, int column) {
+                double adaptation = (-1) * learningRate * layerErrorSignal.data[neuron] * input.data[column];
+                return value + adaptation;
             }
         });
 
         biases.applyOnEachElement(new VectorElementFunction() {
             @Override
-            public double transform(double data, int index) {
-                double adaptation = (-1) * learningRate * errorSignificances.data[index];
+            public double transform(double data, int neuron) {
+                double adaptation = (-1) * learningRate * layerErrorSignal.data[neuron];
                 return data + adaptation;
             }
         });
@@ -101,6 +101,6 @@ public class Layer {
     public void cleanup() {
         this.input = null;
         this.weightedInput = null;
-        this.errorSignificances = null;
+        this.layerErrorSignal = null;
     }
 }

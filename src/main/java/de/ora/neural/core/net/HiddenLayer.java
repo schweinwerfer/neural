@@ -11,15 +11,16 @@ public class HiddenLayer extends Layer {
     /**
      * Calculates the intensity of error of each neuron of this layer.
      */
-    public Vector calcErrorSignificance(final Vector layerOutputErrors) {
+    public Vector calcLayerErrorSignal(final Vector layerOutputErrors) {
         Vector result = new Vector(neurons);
         for (int i = 0; i < result.length; i++) {
-            double gradient = activationFunction.derivate(weightedInput.data[i]);
+            double gradient1 = output.data[i] * (1 - output.data[i]);
+//            double gradient = activationFunction.derivate(weightedInput.data[i]);
             double nodeOutputErrors = layerOutputErrors.data[i];
-            result.data[i] = nodeOutputErrors * gradient;
+            result.data[i] = nodeOutputErrors * gradient1;
         }
 
-        this.errorSignificances = result;
+        this.layerErrorSignal = result;
 
         return result;
     }

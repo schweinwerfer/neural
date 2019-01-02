@@ -92,15 +92,15 @@ public class Net {
     Vector train(final Vector input, final Vector expectedOutput) {
         Vector result = propagate(input);
         Vector error = outputLayer.error(expectedOutput);
-        Vector errorSignificance = outputLayer.calcErrorSignificance(expectedOutput);
+        Vector layerErrorSignal = outputLayer.calcLayerErrorSignal(expectedOutput);
+        Vector inputErrors = outputLayer.calcInputErrors(layerErrorSignal);
 
-        Vector inputErrors = outputLayer.calcInputErrors(errorSignificance);
         Iterator<HiddenLayer> iterator = layers.descendingIterator();
         HiddenLayer next;
         while (iterator.hasNext()) {
             next = iterator.next();
-            errorSignificance = next.calcErrorSignificance(inputErrors);
-            inputErrors = next.calcInputErrors(errorSignificance);
+            layerErrorSignal = next.calcLayerErrorSignal(inputErrors);
+            inputErrors = next.calcInputErrors(layerErrorSignal);
         }
 
         for (HiddenLayer layer : layers) {
