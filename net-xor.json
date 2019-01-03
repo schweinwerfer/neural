@@ -1,0 +1,54 @@
+{
+  "learningRate": 0.01,
+  "layers": [
+    {
+      "inputLength": 2,
+      "neurons": 2,
+      "weights": {
+        "data": [
+          [
+            -0.2021980899667002,
+            -0.6901035755254361
+          ],
+          [
+            0.6037722915113832,
+            -0.5474335125575596
+          ]
+        ],
+        "rows": 2,
+        "columns": 2
+      },
+      "biases": {
+        "data": [
+          -0.0484769623746083,
+          0.5153644189548441
+        ],
+        "length": 2
+      },
+      "activationFunction": "de.ora.neural.core.activation.SigmoidActivationFunction"
+    }
+  ],
+  "outputLayer": {
+    "inputLength": 2,
+    "neurons": 1,
+    "weights": {
+      "data": [
+        [
+          -0.5487938296461349,
+          0.1486938123467847
+        ]
+      ],
+      "rows": 1,
+      "columns": 2
+    },
+    "biases": {
+      "data": [
+        -0.7707158486538062
+      ],
+      "length": 1
+    },
+    "activationFunction": "de.ora.neural.core.activation.SigmoidActivationFunction"
+  },
+  "avgError": 0.0,
+  "epoch": 0
+}
