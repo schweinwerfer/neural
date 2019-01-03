@@ -1,5 +1,6 @@
 package de.ora.neural.core.activation;
 
+import de.ora.neural.core.net.Layer;
 import de.ora.neural.core.net.Matrix;
 
 /**
@@ -43,5 +44,11 @@ public class SigmoidActivationFunction implements ActivationFunction {
     public double derivate(double input) {
         double sigma = apply(input);
         return sigma * (1 - sigma);
+    }
+
+    @Override
+    public double derivate(Layer input, int index) {
+        double output = input.getOutput().getData()[index];
+        return output * (1 - output);
     }
 }

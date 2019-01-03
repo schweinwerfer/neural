@@ -1,5 +1,6 @@
 package de.ora.neural.core.activation;
 
+import de.ora.neural.core.net.Layer;
 import de.ora.neural.core.net.Matrix;
 
 /**
@@ -25,6 +26,11 @@ public class IdentityActivationFunction implements ActivationFunction {
 
     @Override
     public double derivate(double input) {
+        return 1;
+    }
+
+    @Override
+    public double derivate(Layer input, int index) {
         return 1;
     }
 

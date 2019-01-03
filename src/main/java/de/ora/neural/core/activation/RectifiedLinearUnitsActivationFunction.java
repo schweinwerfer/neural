@@ -1,5 +1,6 @@
 package de.ora.neural.core.activation;
 
+import de.ora.neural.core.net.Layer;
 import de.ora.neural.core.net.Matrix;
 import de.ora.neural.core.net.MatrixElementFunction;
 
@@ -38,4 +39,11 @@ public class RectifiedLinearUnitsActivationFunction implements ActivationFunctio
     public double derivate(double input) {
         return input >= 0 ? 1 : 0;
     }
+
+    @Override
+    public double derivate(Layer input, int index) {
+        return input.getInput().getData()[index] >= 0 ? 1 : 0;
+    }
+
+
 }

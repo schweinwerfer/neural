@@ -17,8 +17,8 @@ public class HiddenLayer extends Layer {
     public Vector calcLayerErrorSignal(final Vector layerOutputErrors) {
         Vector result = new Vector(neurons);
         for (int i = 0; i < result.length; i++) {
-//            double gradient1 = output.data[i] * (1 - output.data[i]);
-            double gradient = activationFunction.derivate(weightedInput.data[i]);
+//            double gradient = output.data[i] * (1 - output.data[i]);
+            double gradient = activationFunction.derivate(this, i);
             double nodeOutputErrors = layerOutputErrors.data[i];
             result.data[i] = nodeOutputErrors * gradient;
         }

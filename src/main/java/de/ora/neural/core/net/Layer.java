@@ -94,10 +94,14 @@ public abstract class Layer {
     }
 
     public void adapt(double learningRate) {
+        double[] temp = new double[neurons];
+        for (int i = 0; i < neurons; i++) {
+            temp[i] = (-1) * learningRate * layerErrorSignal.data[i];
+        }
         weights.applyOnEachElement(new MatrixElementFunction() {
             @Override
             public double transform(double value, int neuron, int column) {
-                double adaptation = (-1) * learningRate * layerErrorSignal.data[neuron] * input.data[column];
+                double adaptation = temp[neuron] * input.data[column];
                 return value + adaptation;
             }
         });
@@ -105,7 +109,7 @@ public abstract class Layer {
         biases.applyOnEachElement(new VectorElementFunction() {
             @Override
             public double transform(double data, int neuron) {
-                double adaptation = (-1) * learningRate * layerErrorSignal.data[neuron];
+                double adaptation = temp[neuron];
                 return data + adaptation;
             }
         });
@@ -135,5 +139,13 @@ public abstract class Layer {
 
     public ActivationFunction getActivationFunction() {
         return activationFunction;
+    }
+
+    public Vector getOutput() {
+        return output;
+    }
+
+    public Vector getInput() {
+        return input;
     }
 }

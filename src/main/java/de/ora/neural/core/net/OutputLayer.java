@@ -30,7 +30,7 @@ public class OutputLayer extends Layer {
     public Vector calcLayerErrorSignal(final Vector expected) {
         Vector result = new Vector(neurons);
         for (int i = 0; i < result.length; i++) {
-//            double gradient1 = output.data[i] * (1 - output.data[i]);
+//            double gradient = output.data[i] * (1 - output.data[i]);
             double gradient = activationFunction.derivate(weightedInput.data[i]);
             double error = output.data[i] - expected.data[i];
             result.data[i] = error * gradient;

@@ -1,5 +1,6 @@
 package de.ora.neural.core.activation;
 
+import de.ora.neural.core.net.Layer;
 import de.ora.neural.core.net.Matrix;
 
 public interface ActivationFunction {
@@ -10,4 +11,7 @@ public interface ActivationFunction {
     Matrix gradient(Matrix input);
 
     double derivate(double input);
+
+    double derivate(Layer input, int index);
+
 }
