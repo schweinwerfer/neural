@@ -1,19 +1,32 @@
 package de.ora.neural.core.net;
 
 import de.ora.neural.core.activation.ActivationFunction;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-public class Layer {
+public abstract class Layer {
     protected int inputLength;
     protected int neurons;
+    @JsonIgnore
     protected Vector layerErrorSignal; // for each neuron: (activation function gradient) * (error of output)
+    @JsonIgnore
     private Vector input; // last input from the previous layer
     private Matrix weights; // W
     protected Vector biases; // b
+    @JsonIgnore
     protected Vector weightedInput; // z = Wa+b of this layer before application of applyActivation function
+    @JsonIgnore
     protected Vector output; // applyActivation result a = s(Wa+b)
+
+    @JsonSerialize(using = ActivationFunctionSerializer.class)
+    @JsonDeserialize(using = ActivationFunctionDeserializer.class)
     protected ActivationFunction activationFunction;
 
-    public Layer(int inputLength, int neurons, ActivationFunction activationFunction) {
+    protected Layer() {
+    }
+
+    protected Layer(int inputLength, int neurons, ActivationFunction activationFunction) {
         input = new Vector(inputLength);
         weights = new Matrix(neurons, inputLength).initRandom();
         biases = new Vector(neurons).initRandom();
@@ -102,5 +115,25 @@ public class Layer {
         this.input = null;
         this.weightedInput = null;
         this.layerErrorSignal = null;
+    }
+
+    public int getInputLength() {
+        return inputLength;
+    }
+
+    public int getNeurons() {
+        return neurons;
+    }
+
+    public Matrix getWeights() {
+        return weights;
+    }
+
+    public Vector getBiases() {
+        return biases;
+    }
+
+    public ActivationFunction getActivationFunction() {
+        return activationFunction;
     }
 }

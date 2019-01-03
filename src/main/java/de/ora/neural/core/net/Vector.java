@@ -6,6 +6,9 @@ public class Vector {
     double[] data;
     int length;
 
+    private Vector() {
+    }
+
     public Vector(double... data) {
         this.data = data;
         this.length = data.length;
@@ -104,5 +107,9 @@ public class Vector {
         for (int i = 0; i < length; i++) {
                 data[i] = function.transform(data[i], i);
         }
+    }
+
+    public double[] getData() {
+        return data;
     }
 }

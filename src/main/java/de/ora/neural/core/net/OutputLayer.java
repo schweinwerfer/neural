@@ -4,6 +4,9 @@ import de.ora.neural.core.activation.ActivationFunction;
 
 public class OutputLayer extends Layer {
 
+    private OutputLayer() {
+    }
+
     public OutputLayer(int inputLength, int neurons, ActivationFunction activationFunction) {
         super(inputLength, neurons, activationFunction);
     }

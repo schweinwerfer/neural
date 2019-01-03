@@ -4,6 +4,9 @@ import de.ora.neural.core.activation.ActivationFunction;
 
 public class HiddenLayer extends Layer {
 
+    private HiddenLayer() {
+    }
+
     public HiddenLayer(int inputLength, int neurons, ActivationFunction activationFunction) {
         super(inputLength, neurons, activationFunction);
     }

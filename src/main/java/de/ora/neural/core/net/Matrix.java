@@ -1,11 +1,17 @@
 package de.ora.neural.core.net;
 
+import org.json.simple.JSONArray;
+
+import java.util.Arrays;
 import java.util.Random;
 
 public class Matrix {
     public double[][] data;
     int rows;
     int columns;
+
+    private Matrix() {
+    }
 
     public Matrix(double[][] data) {
         this.data = data;
@@ -203,5 +209,4 @@ public class Matrix {
             throw new IllegalArgumentException("Dimensions do not match: expected rows " + rows + " found " + input.rows + ", expected columns " + columns + " found " + input.columns);
         }
     }
-
 }

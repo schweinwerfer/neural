@@ -1,26 +1,28 @@
 package de.ora.neural.core.net;
 
-import de.ora.neural.core.activation.SigmoidActivationFunction;
 import de.ora.neural.util.Stopwatch;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 
-public class NetTest {
+public class NetTimeTest {
 
 
     private Random rnd = new Random();
 
     @Test
-    public void propagate() {
-
-        Net net = new Net(0.01)
-                .addHiddenLayer(new HiddenLayer(2, 2, new SigmoidActivationFunction()))
-//                .addHiddenLayer(new HiddenLayer(2, 3, new SigmoidActivationFunction()))
-                .addOutputLayer(new OutputLayer(2, 1, new SigmoidActivationFunction()));
+    public void propagate() throws IOException {
+        File netFile = new File("net-xor.json");
+        Net net = Net.load(netFile);
+        if (net == null) {
+            net = new Net(2, 2, 1);
+            net.store(netFile);
+        }
 
         List<TrainingData> trainingSet = new ArrayList<>();
         trainingSet.add(new TrainingData(new Vector(0, 0), new Vector(0.0)));
@@ -31,6 +33,10 @@ public class NetTest {
         double error = 1;
         Stopwatch stopwatch = Stopwatch.createStarted();
         while (error > 0.01) {
+            if (net.getEpoch() > 200000) {
+                netFile.delete();
+                break;
+            }
             error = net.train(trainingSet);
         }
 
