@@ -1,8 +1,5 @@
 package de.ora.neural.core.net;
 
-import org.json.simple.JSONArray;
-
-import java.util.Arrays;
 import java.util.Random;
 
 public class Matrix {
@@ -180,6 +177,10 @@ public class Matrix {
         return result;
     }
 
+    public double getRawCell(int row, int column) {
+        return data[row][column];
+    }
+
     public int getRows() {
         return rows;
     }
@@ -208,5 +209,11 @@ public class Matrix {
         if (!dimensionsMatch(input)) {
             throw new IllegalArgumentException("Dimensions do not match: expected rows " + rows + " found " + input.rows + ", expected columns " + columns + " found " + input.columns);
         }
+    }
+
+    public double set(int row, int column, double value) {
+        double oldValue = this.data[row][column];
+        this.data[row][column] = value;
+        return oldValue;
     }
 }
