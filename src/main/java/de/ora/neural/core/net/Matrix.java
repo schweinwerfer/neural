@@ -1,5 +1,7 @@
 package de.ora.neural.core.net;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 
 public class Matrix {
@@ -215,5 +217,22 @@ public class Matrix {
         double oldValue = this.data[row][column];
         this.data[row][column] = value;
         return oldValue;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Matrix matrix = (Matrix) o;
+        return getRows() == matrix.getRows() &&
+                getColumns() == matrix.getColumns() &&
+                Arrays.equals(data, matrix.data);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(getRows(), getColumns());
+        result = 31 * result + Arrays.hashCode(data);
+        return result;
     }
 }

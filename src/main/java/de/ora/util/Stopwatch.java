@@ -1,4 +1,4 @@
-package de.ora.neural.util;
+package de.ora.util;
 
 import java.util.concurrent.TimeUnit;
 

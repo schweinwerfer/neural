@@ -1,6 +1,6 @@
 package de.ora.neural.core.net;
 
-import de.ora.neural.util.Stopwatch;
+import de.ora.util.Stopwatch;
 import org.junit.Test;
 
 import java.io.File;

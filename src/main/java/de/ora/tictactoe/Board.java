@@ -4,12 +4,20 @@ import de.ora.neural.core.net.Matrix;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class Board {
     private int dimension;
     protected int winCnt;
     protected Matrix board;
     private Player activePlayer;
+
+    protected Board(final Board other) {
+        this.dimension = other.dimension;
+        this.winCnt = other.winCnt;
+        this.activePlayer = other.activePlayer;
+        this.board = other.board.copy();
+    }
 
     protected Board(int dimension, int winCnt) {
         this.dimension = dimension;
@@ -105,5 +113,26 @@ public abstract class Board {
         sb.append(board);
 
         return sb.toString();
+    }
+
+    public abstract Board copy();
+
+    public boolean set(final Coordinate move) {
+        return this.set(move.row, move.column);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Board)) return false;
+        Board board1 = (Board) o;
+        return dimension == board1.dimension &&
+                winCnt == board1.winCnt &&
+                board.equals(board1.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dimension, winCnt, board);
     }
 }

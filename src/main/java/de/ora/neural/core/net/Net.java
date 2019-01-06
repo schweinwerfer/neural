@@ -1,7 +1,7 @@
 package de.ora.neural.core.net;
 
 import de.ora.neural.core.activation.SigmoidActivationFunction;
-import de.ora.neural.util.Stopwatch;
+import de.ora.util.Stopwatch;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.ObjectMapper;
 

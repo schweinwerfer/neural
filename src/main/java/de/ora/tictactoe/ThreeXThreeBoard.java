@@ -1,6 +1,10 @@
 package de.ora.tictactoe;
 
 public class ThreeXThreeBoard extends Board {
+    public ThreeXThreeBoard(Board other) {
+        super(other);
+    }
+
     public ThreeXThreeBoard() {
         super(3, 3);
     }
@@ -37,5 +41,10 @@ public class ThreeXThreeBoard extends Board {
         }
 
         return Player.NONE;
+    }
+
+    @Override
+    public Board copy() {
+        return new ThreeXThreeBoard(this);
     }
 }
