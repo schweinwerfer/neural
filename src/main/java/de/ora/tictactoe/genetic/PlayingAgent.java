@@ -33,7 +33,7 @@ public class PlayingAgent {
         List<Coordinate> possibleMoves = moves.get(board);
         if (possibleMoves == null) {
             possibleMoves = new ArrayList<>();
-            moves.put(board, possibleMoves);
+            moves.put(board.copy(), possibleMoves);
         }
 
         if (possibleMoves.isEmpty()) {

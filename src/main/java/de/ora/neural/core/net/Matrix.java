@@ -12,10 +12,15 @@ public class Matrix {
     private Matrix() {
     }
 
-    public Matrix(double[][] data) {
-        this.data = data;
-        this.rows = data.length;
-        this.columns = data[0].length;
+    public Matrix(double[][] otherData) {
+        this.rows = otherData.length;
+        this.columns = otherData[0].length;
+        this.data = new double[this.rows][this.columns];
+        for (int row = 0; row < otherData.length; row++) {
+            for (int cell = 0; cell < otherData[row].length; cell++) {
+                this.data[row][cell] = otherData[row][cell];
+            }
+        }
     }
 
     public Matrix(int rows, int columns) {
