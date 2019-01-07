@@ -16,26 +16,38 @@ public class ThreeXThreeBoard extends Board {
 
         for (int row = 0; row < board.data.length; row++) {
             Double value = board.getRawCell(row, row);
-            if (value.intValue() == currentCode) {
+            int intValue = value.intValue();
+            if (intValue == Player.NONE.getCode()) {
+                currentCode = Player.NONE.getCode();
+                currentCnt = 0;
+                continue;
+            }
+            if (intValue == currentCode) {
                 currentCnt++;
                 if (currentCnt == winCnt) {
                     return Player.from(currentCode);
                 }
             } else {
-                currentCode = value.intValue();
+                currentCode = intValue;
                 currentCnt = 1;
             }
         }
 
         for (int row = 0; row < board.data.length; row++) {
             Double value = board.getRawCell(row, 2 - row);
-            if (value.intValue() == currentCode) {
+            int intValue = value.intValue();
+            if (intValue == Player.NONE.getCode()) {
+                currentCode = Player.NONE.getCode();
+                currentCnt = 0;
+                continue;
+            }
+            if (intValue == currentCode) {
                 currentCnt++;
                 if (currentCnt == winCnt) {
                     return Player.from(currentCode);
                 }
             } else {
-                currentCode = value.intValue();
+                currentCode = intValue;
                 currentCnt = 1;
             }
         }

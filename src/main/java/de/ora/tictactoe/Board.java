@@ -61,6 +61,9 @@ public abstract class Board {
                         currentCode = value.intValue();
                         currentCnt = 1;
                     }
+                } else {
+                    currentCode = Player.NONE.getCode();
+                    currentCnt = 0;
                 }
             }
         }
@@ -81,6 +84,9 @@ public abstract class Board {
                         currentCode = value.intValue();
                         currentCnt = 1;
                     }
+                } else {
+                    currentCode = Player.NONE.getCode();
+                    currentCnt = 0;
                 }
             }
         }
@@ -112,6 +118,19 @@ public abstract class Board {
         sb.append("Active Player: ").append(activePlayer).append(System.lineSeparator());
         sb.append(board);
 
+        return sb.toString();
+    }
+
+    public String asKey() {
+        StringBuilder sb = new StringBuilder(activePlayer.name()).append(System.lineSeparator());
+        for (double[] row : this.board.data) {
+            for (double cell : row) {
+                sb.append(cell).append(' ');
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append(System.lineSeparator());
+        }
+        sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
 
