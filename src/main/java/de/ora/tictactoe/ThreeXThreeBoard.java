@@ -33,6 +33,9 @@ public class ThreeXThreeBoard extends Board {
             }
         }
 
+        currentCode = Player.NONE.getCode();
+        currentCnt = 0;
+
         for (int row = 0; row < board.data.length; row++) {
             Double value = board.getRawCell(row, 2 - row);
             int intValue = value.intValue();

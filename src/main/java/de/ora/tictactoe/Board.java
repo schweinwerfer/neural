@@ -50,6 +50,8 @@ public abstract class Board {
 
         // columns
         for (int c = 0; c < board.getColumns(); c++) {
+            currentCode = Player.NONE.getCode();
+            currentCnt = 0;
             for (Double value : board.getColumn(c).getData()) {
                 if (value != Player.NONE.getCode()) {
                     if (value.intValue() == currentCode) {
@@ -73,6 +75,8 @@ public abstract class Board {
 
         // rows
         for (double[] row : board.data) {
+            currentCode = Player.NONE.getCode();
+            currentCnt = 0;
             for (Double value : row) {
                 if (value != Player.NONE.getCode()) {
                     if (value.intValue() == currentCode) {

@@ -9,8 +9,10 @@ public class Tournament {
     int epoch = 0;
     private double avgScore;
     private double oldAvgScore;
+    private Random rnd;
 
     public Tournament() {
+        rnd = new Random();
     }
 
     public static void main(String[] args) {
@@ -76,7 +78,7 @@ public class Tournament {
         // pick 20 of the best
         List<PlayingAgent> breedPool = new ArrayList<>();
         Iterator<PlayingAgent> iterator = population.iterator();
-        int pickCnt = 20;
+        int pickCnt = 100;
 
         while (pickCnt > 0 && iterator.hasNext()) {
             PlayingAgent picked = iterator.next();
@@ -90,9 +92,9 @@ public class Tournament {
 //            return;
 //        }
         // pick 5 from the rest randomly
-        pickCnt = 5;
+        pickCnt = 10;
         while (pickCnt > 0) {
-            PlayingAgent playingAgent = population.get(new Random().nextInt(population.size()));
+            PlayingAgent playingAgent = population.get(rnd.nextInt(population.size()));
             if (!breedPool.contains(playingAgent)) {
                 breedPool.add(playingAgent);
                 pickCnt--;
@@ -105,10 +107,15 @@ public class Tournament {
         int lastWinner = -1;
         for (int i = 0; i < breedPool.size(); i++) {
             for (int j = 0; j < breedPool.size(); j++) {
-                if (i != j) {
+                if (population.size() >= 1000) {
+                    break;
+                }
+
+                boolean breed = rnd.nextBoolean();
+                if (i != j && breed) {
                     population.add(new PlayingAgent(breedPool.get(i), breedPool.get(j)));
                 }
-                if (lastWinner != i && i < 10) {
+                if (lastWinner != i && i < 100) {
                     population.add(breedPool.get(i)); // add old winners
                     lastWinner = i;
                 }

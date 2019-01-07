@@ -16,6 +16,9 @@ public class PlayingAgent {
     private int winCnt = 0;
     private int loseCnt = 0;
     private int drawCnt = 0;
+    private String lastMoveKey;
+    private Set<String> winningMoveKeys = new HashSet<>();
+    private Set<String> drawMoveKeys = new HashSet<>();
 
     public PlayingAgent(String name) {
         this.name = name;
@@ -29,13 +32,18 @@ public class PlayingAgent {
         int fatherMoveCnt = father.moves.size();
         int motherMoveCnt = mother.moves.size();
 
+        father.addDominantMoves(this.moves);
+        mother.addDominantMoves(this.moves);
+        father.addDrawMoves(this.moves);
+        mother.addDrawMoves(this.moves);
+
         if (fatherMoveCnt >= motherMoveCnt) {
-//            this.moves.putAll(pickRandomlyFrom(mother.moves, motherMoveCnt / 2));
-            this.moves.putAll(pickLinearFrom(mother.moves, motherMoveCnt / 2));
+            this.moves.putAll(pickRandomlyFrom(mother.moves, motherMoveCnt / 2));
+//            this.moves.putAll(pickLinearFrom(mother.moves, motherMoveCnt / 2));
             fillWithMissingMoves(this.moves, father.moves);
         } else {
-//            this.moves.putAll(pickRandomlyFrom(father.moves, fatherMoveCnt / 2));
-            this.moves.putAll(pickLinearFrom(father.moves, fatherMoveCnt / 2));
+            this.moves.putAll(pickRandomlyFrom(father.moves, fatherMoveCnt / 2));
+//            this.moves.putAll(pickLinearFrom(father.moves, fatherMoveCnt / 2));
             fillWithMissingMoves(this.moves, mother.moves);
         }
 
@@ -47,6 +55,21 @@ public class PlayingAgent {
             this.moves.remove(keys.get(rnd.nextInt(keys.size())));
         }
 
+    }
+
+    private void addDrawMoves(final Map<String, List<Coordinate>> kidsMoves) {
+        for (String key : winningMoveKeys) {
+            if (kidsMoves.containsKey(key)) {
+                continue;
+            }
+            kidsMoves.put(key, this.moves.get(key));
+        }
+    }
+
+    private void addDominantMoves(final Map<String, List<Coordinate>> kidsMoves) {
+        for (String key : winningMoveKeys) {
+            kidsMoves.put(key, this.moves.get(key));
+        }
     }
 
     public Coordinate play(final Player player, final Board board) {
@@ -71,21 +94,26 @@ public class PlayingAgent {
             }
         }
 
-        return possibleMoves.get(0);
+        Coordinate coordinate = possibleMoves.get(0);
+        this.lastMoveKey = key;
+        return coordinate;
     }
 
     public void feedback(final GameResult result, int score) {
         switch (result) {
             case WON:
+                this.winningMoveKeys.add(lastMoveKey);
                 this.winCnt++;
                 break;
             case LOST:
                 this.loseCnt++;
                 break;
             case DRAW:
+                this.drawMoveKeys.add(lastMoveKey);
                 this.drawCnt++;
                 break;
         }
+        this.lastMoveKey = null;
         this.score += score;
     }
 
@@ -99,11 +127,15 @@ public class PlayingAgent {
 
     public String getDetailedScore() {
         StringBuilder sb = new StringBuilder();
-        sb.append(score).append(" (w: ").append(winCnt).append(", l: ").append(loseCnt).append(", d: ").append(drawCnt).append(")");
+        float success = (float) ((winCnt + drawCnt + 0.0) / (winCnt + drawCnt + loseCnt));
+        sb.append(score).append(" (w: ").append(winCnt).append(", l: ").append(loseCnt).append(", d: ").append(drawCnt).append(", success: ").append(success).append(")");
         return sb.toString();
     }
 
     public void resetScore() {
+        this.lastMoveKey = null;
+        this.winningMoveKeys.clear();
+        this.drawMoveKeys.clear();
         this.score = 0;
         this.winCnt = 0;
         this.loseCnt = 0;

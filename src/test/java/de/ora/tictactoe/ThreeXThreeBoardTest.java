@@ -64,6 +64,18 @@ public class ThreeXThreeBoardTest {
         board.set(2, 0);// 1
         Assert.assertEquals(Player.NONE, board.findWinner());
         System.out.println(board);
+
+        board.reset();
+        Assert.assertTrue(board.activePlayer() == Player.PLAYER1);
+        board.set(0, 1);//1
+        board.set(0, 0);
+        Assert.assertEquals(Player.NONE, board.findWinner());
+        board.set(1, 1);// 1
+        board.set(1, 0);
+        Assert.assertEquals(Player.NONE, board.findWinner());
+        board.set(2, 0);// 1
+        Assert.assertEquals(Player.NONE, board.findWinner());
+        System.out.println(board);
     }
 
     public <T> T pickRandomItem(List<T> items) {
