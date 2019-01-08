@@ -4,6 +4,9 @@ public class Coordinate {
     int row;
     int column;
 
+    protected Coordinate() {
+    }
+
     public Coordinate(int row, int column) {
         this.row = row;
         this.column = column;
@@ -14,5 +17,13 @@ public class Coordinate {
         return "(" + row +
                 "," + column +
                 ')';
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getColumn() {
+        return column;
     }
 }

@@ -3,31 +3,34 @@ package de.ora.tictactoe.genetic;
 import de.ora.tictactoe.*;
 import de.ora.util.Stopwatch;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
 public class Tournament {
     private static final Logger LOG = Logger.getLogger(Tournament.class.getSimpleName());
-    private static final int POPULATION_SIZE = 500;
+    private static final int POPULATION_SIZE = 1000;
     private List<PlayingAgent> population = new ArrayList<>();
     int epoch = 0;
-    private double avgScore;
-    private double oldAvgScore;
+    private double avgFitness;
     private Random rnd;
 
     public Tournament() {
         rnd = new Random();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Tournament tournament = new Tournament();
         tournament.createPopulation(POPULATION_SIZE);
         tournament.start();
     }
 
-    private void start() {
+    private void start() throws IOException {
         boolean isRunning = true;
+
         while (isRunning) {
+            int gamesPlayed = 0;
             LOG.info("Tournament " + (++epoch) + " size: " + population.size());
             Stopwatch stopwatch = Stopwatch.createStarted();
             Board board = new ThreeXThreeBoard();
@@ -38,52 +41,50 @@ public class Tournament {
                         PlayingAgent opponent = population.get(j);
 
                         Player winner = play(board, playingAgent, opponent);
-
+                        gamesPlayed++;
                         switch (winner) {
                             case PLAYER1:
-                                playingAgent.feedback(GameResult.WON, 2);
-                                opponent.feedback(GameResult.LOST, -2);
+                                playingAgent.feedback(GameResult.WON);
+                                opponent.feedback(GameResult.LOST);
                                 break;
                             case PLAYER2:
-                                playingAgent.feedback(GameResult.LOST, -2);
-                                opponent.feedback(GameResult.WON, 2);
+                                playingAgent.feedback(GameResult.LOST);
+                                opponent.feedback(GameResult.WON);
                                 break;
                             case NONE:
-                                playingAgent.feedback(GameResult.DRAW, 1);
-                                opponent.feedback(GameResult.DRAW, 1);
+                                playingAgent.feedback(GameResult.DRAW);
+                                opponent.feedback(GameResult.DRAW);
                                 break;
                         }
 
                     }
                 }
             }
-            LOG.info("Done @ " + stopwatch.toString());
+            LOG.info("Done @ " + stopwatch.toString() + ". Games played: " + gamesPlayed);
             // Sort best performers to start of list
             Collections.sort(population, new Comparator<PlayingAgent>() {
                 @Override
                 public int compare(PlayingAgent o1, PlayingAgent o2) {
-                    Double score1 = o1.getSuccessRatio();
-                    Double score2 = o2.getSuccessRatio();
+                    Double score1 = o1.getFitness();
+                    Double score2 = o2.getFitness();
 
                     return score2.compareTo(score1);
                 }
             });
 
             // calc avg score of population
-            oldAvgScore = avgScore;
-            avgScore = 0;
+            avgFitness = 0;
             for (PlayingAgent agent : population) {
-                avgScore += agent.getScore() * 1.0;
+                avgFitness += agent.getFitness();
             }
-            avgScore = avgScore / population.size();
+            avgFitness = avgFitness / population.size();
 
             PlayingAgent bestAgent = population.get(0);
-            if (bestAgent.getSuccessRatio() == 1.0) {
+            if (bestAgent.getFitness() == 1.0) {
                 break;
             }
 
-            LOG.info(("Tournament " + epoch + " end. best: " + bestAgent.getDetailedScore() + " avg: " + avgScore + " worst: " + population.get(population.size() - 1).getDetailedScore()));
-            LOG.info("");
+            LOG.info(("Tournament " + epoch + " end. best: " + bestAgent.getDetailedScore() + " avg: " + avgFitness + " worst: " + population.get(population.size() - 1).getDetailedScore()));
 
             // pick 20 of the best
             List<PlayingAgent> breedPool = new ArrayList<>();
@@ -92,15 +93,11 @@ public class Tournament {
 
             while (pickCnt > 0 && iterator.hasNext()) {
                 PlayingAgent picked = iterator.next();
-//            System.out.println(picked.getName() + ": " + picked.getScore());
                 iterator.remove();
                 breedPool.add(picked);
                 pickCnt--;
             }
 
-//        if (avgScore == oldAvgScore) {
-//            return;
-//        }
             // pick 5 from the rest randomly
             pickCnt = 10;
             while (pickCnt > 0) {
@@ -139,6 +136,12 @@ public class Tournament {
             fillPopulation(POPULATION_SIZE);
         }
         LOG.info("Tournament done.");
+        File agentDir = new File("tournament/agents/");
+        agentDir.mkdirs();
+        for (int i = 0; i < 10; i++) {
+            PlayingAgent agent = population.get(i);
+            agent.store(agentDir);
+        }
     }
 
     private Player play(Board board, PlayingAgent playingAgent, PlayingAgent opponent) {
@@ -148,7 +151,7 @@ public class Tournament {
             Coordinate move = playingAgent.play(board.activePlayer(), board);
             boolean valid = board.set(move);
             if (!valid) {
-                playingAgent.feedback(GameResult.LOST, -2);
+                playingAgent.feedback(GameResult.LOST);
             }
             Player winner = board.findWinner();
             if (winner != Player.NONE) {
@@ -161,7 +164,7 @@ public class Tournament {
             move = opponent.play(board.activePlayer(), board);
             valid = board.set(move);
             if (!valid) {
-                opponent.feedback(GameResult.LOST, -2);
+                opponent.feedback(GameResult.LOST);
             }
             winner = board.findWinner();
             if (winner != Player.NONE) {

@@ -4,21 +4,31 @@ import de.ora.tictactoe.Board;
 import de.ora.tictactoe.Coordinate;
 import de.ora.tictactoe.GameResult;
 import de.ora.tictactoe.Player;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.ObjectMapper;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class PlayingAgent {
     private String name;
     private int generation;
-    private int score = 0;
     private Map<String, List<Coordinate>> moves = new HashMap<>();
+    @JsonIgnore
     private Random rnd = new Random();
     private int winCnt = 0;
     private int loseCnt = 0;
     private int drawCnt = 0;
+    @JsonIgnore
     private String lastMoveKey;
+    @JsonIgnore
     private Set<String> winningMoveKeys = new HashSet<>();
+    @JsonIgnore
     private Set<String> drawMoveKeys = new HashSet<>();
+
+    protected PlayingAgent() {
+    }
 
     public PlayingAgent(String name) {
         this.name = name;
@@ -48,7 +58,6 @@ public class PlayingAgent {
         }
 
         if (rnd.nextInt(100) % 42 == 0) {
-//            System.out.println("xxx mutation");
             Set<String> keysSet = this.moves.keySet();
             List<String> keys = new ArrayList<String>();
             keys.addAll(keysSet);
@@ -58,7 +67,7 @@ public class PlayingAgent {
     }
 
     private void addDrawMoves(final Map<String, List<Coordinate>> kidsMoves) {
-        for (String key : winningMoveKeys) {
+        for (String key : drawMoveKeys) {
             if (kidsMoves.containsKey(key)) {
                 continue;
             }
@@ -99,7 +108,7 @@ public class PlayingAgent {
         return coordinate;
     }
 
-    public void feedback(final GameResult result, int score) {
+    public void feedback(final GameResult result) {
         switch (result) {
             case WON:
                 this.winningMoveKeys.add(lastMoveKey);
@@ -114,36 +123,27 @@ public class PlayingAgent {
                 break;
         }
         this.lastMoveKey = null;
-        this.score += score;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getScore() {
-        return score;
-    }
-
-    public double getSuccessRatio() {
-        double successCnt = winCnt + drawCnt;
+    public double getFitness() {
+        double successCnt = winCnt + (double) drawCnt;
         double playedGamesCnt = successCnt + loseCnt;
 
         return successCnt / playedGamesCnt;
     }
 
     public String getDetailedScore() {
-        StringBuilder sb = new StringBuilder();
-        float success = (float) ((winCnt + drawCnt + 0.0) / (winCnt + drawCnt + loseCnt));
-        sb.append(score).append(" (w: ").append(winCnt).append(", l: ").append(loseCnt).append(", d: ").append(drawCnt).append(", success: ").append(success).append(")");
-        return sb.toString();
+        return String.valueOf(getFitness()) + " (w: " + winCnt + ", l: " + loseCnt + ", d: " + drawCnt + ")";
     }
 
     public void resetScore() {
         this.lastMoveKey = null;
         this.winningMoveKeys.clear();
         this.drawMoveKeys.clear();
-        this.score = 0;
         this.winCnt = 0;
         this.loseCnt = 0;
         this.drawCnt = 0;
@@ -198,5 +198,51 @@ public class PlayingAgent {
 
     public int getGeneration() {
         return generation;
+    }
+
+    public File store(final File dir, final String filename) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        File resultFile = new File(dir, filename);
+        mapper.writeValue(resultFile, this);
+
+        return resultFile;
+    }
+
+    public File store(final File dir) throws IOException {
+        return store(dir, "agent_" + winCnt + "-" + drawCnt + "-" + loseCnt + "_" + System.currentTimeMillis() + ".json");
+    }
+
+    public File store(final String filename) throws IOException {
+        File file = new File(filename + ".json");
+        return store(file);
+    }
+
+    public static PlayingAgent load(final File file) throws IOException {
+        if (!file.exists() || !file.canRead()) {
+            return null;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(file, PlayingAgent.class);
+    }
+
+    public static PlayingAgent load(final String filename) throws IOException {
+        File file = new File(filename + ".json");
+        return load(file);
+    }
+
+    public Map<String, List<Coordinate>> getMoves() {
+        return moves;
+    }
+
+    public int getWinCnt() {
+        return winCnt;
+    }
+
+    public int getLoseCnt() {
+        return loseCnt;
+    }
+
+    public int getDrawCnt() {
+        return drawCnt;
     }
 }
