@@ -60,8 +60,8 @@ public class Tournament {
         Collections.sort(population, new Comparator<PlayingAgent>() {
             @Override
             public int compare(PlayingAgent o1, PlayingAgent o2) {
-                Integer score1 = o1.getScore();
-                Integer score2 = o2.getScore();
+                Double score1 = o1.getSuccessRatio();
+                Double score2 = o2.getSuccessRatio();
 
                 return score2.compareTo(score1);
             }

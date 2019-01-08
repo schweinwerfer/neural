@@ -125,6 +125,13 @@ public class PlayingAgent {
         return score;
     }
 
+    public double getSuccessRatio() {
+        double successCnt = winCnt + drawCnt;
+        double playedGamesCnt = successCnt + loseCnt;
+
+        return successCnt / playedGamesCnt;
+    }
+
     public String getDetailedScore() {
         StringBuilder sb = new StringBuilder();
         float success = (float) ((winCnt + drawCnt + 0.0) / (winCnt + drawCnt + loseCnt));
