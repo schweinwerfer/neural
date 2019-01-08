@@ -26,112 +26,119 @@ public class Tournament {
     }
 
     private void start() {
-        LOG.info("Tournament " + (++epoch) + " size: " + population.size());
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        Board board = new ThreeXThreeBoard();
-        for (int i = 0; i < population.size(); i++) {
-            PlayingAgent playingAgent = population.get(i);
-            for (int j = 0; j < population.size(); j++) {
-                if (i != j) {
-                    PlayingAgent opponent = population.get(j);
+        boolean isRunning = true;
+        while (isRunning) {
+            LOG.info("Tournament " + (++epoch) + " size: " + population.size());
+            Stopwatch stopwatch = Stopwatch.createStarted();
+            Board board = new ThreeXThreeBoard();
+            for (int i = 0; i < population.size(); i++) {
+                PlayingAgent playingAgent = population.get(i);
+                for (int j = 0; j < population.size(); j++) {
+                    if (i != j) {
+                        PlayingAgent opponent = population.get(j);
 
-                    Player winner = play(board, playingAgent, opponent);
+                        Player winner = play(board, playingAgent, opponent);
 
-                    switch (winner) {
-                        case PLAYER1:
-                            playingAgent.feedback(GameResult.WON, 2);
-                            opponent.feedback(GameResult.LOST, -2);
-                            break;
-                        case PLAYER2:
-                            playingAgent.feedback(GameResult.LOST, -2);
-                            opponent.feedback(GameResult.WON, 2);
-                            break;
-                        case NONE:
-                            playingAgent.feedback(GameResult.DRAW, 1);
-                            opponent.feedback(GameResult.DRAW, 1);
-                            break;
+                        switch (winner) {
+                            case PLAYER1:
+                                playingAgent.feedback(GameResult.WON, 2);
+                                opponent.feedback(GameResult.LOST, -2);
+                                break;
+                            case PLAYER2:
+                                playingAgent.feedback(GameResult.LOST, -2);
+                                opponent.feedback(GameResult.WON, 2);
+                                break;
+                            case NONE:
+                                playingAgent.feedback(GameResult.DRAW, 1);
+                                opponent.feedback(GameResult.DRAW, 1);
+                                break;
+                        }
+
                     }
-
                 }
             }
-        }
-        LOG.info("Done @ " + stopwatch.toString());
-        // Sort best performers to start of list
-        Collections.sort(population, new Comparator<PlayingAgent>() {
-            @Override
-            public int compare(PlayingAgent o1, PlayingAgent o2) {
-                Double score1 = o1.getSuccessRatio();
-                Double score2 = o2.getSuccessRatio();
+            LOG.info("Done @ " + stopwatch.toString());
+            // Sort best performers to start of list
+            Collections.sort(population, new Comparator<PlayingAgent>() {
+                @Override
+                public int compare(PlayingAgent o1, PlayingAgent o2) {
+                    Double score1 = o1.getSuccessRatio();
+                    Double score2 = o2.getSuccessRatio();
 
-                return score2.compareTo(score1);
+                    return score2.compareTo(score1);
+                }
+            });
+
+            // calc avg score of population
+            oldAvgScore = avgScore;
+            avgScore = 0;
+            for (PlayingAgent agent : population) {
+                avgScore += agent.getScore() * 1.0;
             }
-        });
+            avgScore = avgScore / population.size();
 
-        // calc avg score of population
-        oldAvgScore = avgScore;
-        avgScore = 0;
-        for (PlayingAgent agent : population) {
-            avgScore += agent.getScore() * 1.0;
-        }
-        avgScore = avgScore / population.size();
+            PlayingAgent bestAgent = population.get(0);
+            if (bestAgent.getSuccessRatio() == 1.0) {
+                break;
+            }
 
-        LOG.info(("Tournament " + epoch + " end. best: " + population.get(0).getDetailedScore() + " avg: " + avgScore + " worst: " + population.get(population.size() - 1).getDetailedScore()));
-        LOG.info("");
+            LOG.info(("Tournament " + epoch + " end. best: " + bestAgent.getDetailedScore() + " avg: " + avgScore + " worst: " + population.get(population.size() - 1).getDetailedScore()));
+            LOG.info("");
 
-        // pick 20 of the best
-        List<PlayingAgent> breedPool = new ArrayList<>();
-        Iterator<PlayingAgent> iterator = population.iterator();
-        int pickCnt = 100;
+            // pick 20 of the best
+            List<PlayingAgent> breedPool = new ArrayList<>();
+            Iterator<PlayingAgent> iterator = population.iterator();
+            int pickCnt = 100;
 
-        while (pickCnt > 0 && iterator.hasNext()) {
-            PlayingAgent picked = iterator.next();
+            while (pickCnt > 0 && iterator.hasNext()) {
+                PlayingAgent picked = iterator.next();
 //            System.out.println(picked.getName() + ": " + picked.getScore());
-            iterator.remove();
-            breedPool.add(picked);
-            pickCnt--;
-        }
+                iterator.remove();
+                breedPool.add(picked);
+                pickCnt--;
+            }
 
 //        if (avgScore == oldAvgScore) {
 //            return;
 //        }
-        // pick 5 from the rest randomly
-        pickCnt = 10;
-        while (pickCnt > 0) {
-            PlayingAgent playingAgent = population.get(rnd.nextInt(population.size()));
-            if (!breedPool.contains(playingAgent)) {
-                breedPool.add(playingAgent);
-                pickCnt--;
-            }
-        }
-
-        population.clear();
-
-        // breed
-        int lastWinner = -1;
-        for (int i = 0; i < breedPool.size(); i++) {
-            for (int j = 0; j < breedPool.size(); j++) {
-                if (population.size() >= POPULATION_SIZE) {
-                    break;
-                }
-
-                boolean breed = rnd.nextBoolean();
-                if (i != j && breed) {
-                    population.add(new PlayingAgent(breedPool.get(i), breedPool.get(j)));
-                }
-                if (lastWinner != i && i < 100) {
-                    population.add(breedPool.get(i)); // add old winners
-                    lastWinner = i;
+            // pick 5 from the rest randomly
+            pickCnt = 10;
+            while (pickCnt > 0) {
+                PlayingAgent playingAgent = population.get(rnd.nextInt(population.size()));
+                if (!breedPool.contains(playingAgent)) {
+                    breedPool.add(playingAgent);
+                    pickCnt--;
                 }
             }
+
+            population.clear();
+
+            // breed
+            int lastWinner = -1;
+            for (int i = 0; i < breedPool.size(); i++) {
+                for (int j = 0; j < breedPool.size(); j++) {
+                    if (population.size() >= POPULATION_SIZE) {
+                        break;
+                    }
+
+                    boolean breed = rnd.nextBoolean();
+                    if (i != j && breed) {
+                        population.add(new PlayingAgent(breedPool.get(i), breedPool.get(j)));
+                    }
+                    if (lastWinner != i && i < 100) {
+                        population.add(breedPool.get(i)); // add old winners
+                        lastWinner = i;
+                    }
+                }
+            }
+
+            for (PlayingAgent playingAgent : population) {
+                playingAgent.resetScore();
+            }
+
+            fillPopulation(POPULATION_SIZE);
         }
-
-        for (PlayingAgent playingAgent : population) {
-            playingAgent.resetScore();
-        }
-
-        fillPopulation(POPULATION_SIZE);
-
-        start();
+        LOG.info("Tournament done.");
     }
 
     private Player play(Board board, PlayingAgent playingAgent, PlayingAgent opponent) {
