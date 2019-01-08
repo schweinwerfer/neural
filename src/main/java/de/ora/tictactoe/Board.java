@@ -2,21 +2,21 @@ package de.ora.tictactoe;
 
 import de.ora.neural.core.net.Matrix;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class Board {
     private int dimension;
     protected int winCnt;
     protected Matrix board;
     private Player activePlayer;
+    private Map<Player, Integer> playerToPiecesCnt = new HashMap<>();
 
     protected Board(final Board other) {
         this.dimension = other.dimension;
         this.winCnt = other.winCnt;
         this.activePlayer = other.activePlayer;
         this.board = other.board.copy();
+        this.playerToPiecesCnt = other.playerToPiecesCnt;
     }
 
     protected Board(int dimension, int winCnt) {
@@ -27,6 +27,7 @@ public abstract class Board {
 
     public void reset() {
         board = new Matrix(dimension, dimension).initWith(Player.NONE.getCode());
+        playerToPiecesCnt = new HashMap<>();
         activePlayer = Player.PLAYER1;
     }
 
@@ -45,6 +46,9 @@ public abstract class Board {
     }
 
     public Player findWinner() {
+        if (winnerCheckNotNeeded()) {
+            return Player.NONE;
+        }
         int currentCode = Player.NONE.getCode();
         int currentCnt = 0;
 
@@ -99,6 +103,12 @@ public abstract class Board {
         return findDiagonalWinner();
     }
 
+    private boolean winnerCheckNotNeeded() {
+        Integer player1Cnt = this.playerToPiecesCnt.getOrDefault(Player.PLAYER1, 0);
+        Integer player2Cnt = this.playerToPiecesCnt.getOrDefault(Player.PLAYER2, 0);
+        return player1Cnt < winCnt && player2Cnt < winCnt;
+    }
+
     protected abstract Player findDiagonalWinner();
 
     public Player activePlayer() {
@@ -111,6 +121,8 @@ public abstract class Board {
             board.set(row, column, existing);
             return false;
         } else {
+            this.playerToPiecesCnt.putIfAbsent(activePlayer, 0);
+            this.playerToPiecesCnt.computeIfPresent(activePlayer, (key, value) -> ++value);
             activePlayer = activePlayer == Player.PLAYER1 ? Player.PLAYER2 : Player.PLAYER1;
             return true;
         }

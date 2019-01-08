@@ -1,10 +1,14 @@
 package de.ora.tictactoe.genetic;
 
 import de.ora.tictactoe.*;
+import de.ora.util.Stopwatch;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public class Tournament {
+    private static final Logger LOG = Logger.getLogger(Tournament.class.getSimpleName());
+    private static final int POPULATION_SIZE = 500;
     private List<PlayingAgent> population = new ArrayList<>();
     int epoch = 0;
     private double avgScore;
@@ -17,14 +21,13 @@ public class Tournament {
 
     public static void main(String[] args) {
         Tournament tournament = new Tournament();
-        tournament.createPopulation(1000);
+        tournament.createPopulation(POPULATION_SIZE);
         tournament.start();
     }
 
     private void start() {
-        System.out.println("");
-        System.out.println("Tournament " + (++epoch) + " size: " + population.size());
-        System.out.println("");
+        LOG.info("Tournament " + (++epoch) + " size: " + population.size());
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Board board = new ThreeXThreeBoard();
         for (int i = 0; i < population.size(); i++) {
             PlayingAgent playingAgent = population.get(i);
@@ -52,7 +55,7 @@ public class Tournament {
                 }
             }
         }
-
+        LOG.info("Done @ " + stopwatch.toString());
         // Sort best performers to start of list
         Collections.sort(population, new Comparator<PlayingAgent>() {
             @Override
@@ -72,8 +75,8 @@ public class Tournament {
         }
         avgScore = avgScore / population.size();
 
-        System.out.println("Tournament " + epoch + " end. best: " + population.get(0).getDetailedScore() + " avg: " + avgScore + " worst: " + population.get(population.size() - 1).getDetailedScore());
-        System.out.println("");
+        LOG.info(("Tournament " + epoch + " end. best: " + population.get(0).getDetailedScore() + " avg: " + avgScore + " worst: " + population.get(population.size() - 1).getDetailedScore()));
+        LOG.info("");
 
         // pick 20 of the best
         List<PlayingAgent> breedPool = new ArrayList<>();
@@ -107,7 +110,7 @@ public class Tournament {
         int lastWinner = -1;
         for (int i = 0; i < breedPool.size(); i++) {
             for (int j = 0; j < breedPool.size(); j++) {
-                if (population.size() >= 1000) {
+                if (population.size() >= POPULATION_SIZE) {
                     break;
                 }
 
@@ -126,7 +129,7 @@ public class Tournament {
             playingAgent.resetScore();
         }
 
-        fillPopulation(1000);
+        fillPopulation(POPULATION_SIZE);
 
         start();
     }
