@@ -129,6 +129,7 @@ public class PlayingAgent {
         return name;
     }
 
+    @JsonIgnore
     public double getFitness() {
         double successCnt = winCnt + (double) drawCnt;
         double playedGamesCnt = successCnt + loseCnt;
@@ -136,6 +137,7 @@ public class PlayingAgent {
         return successCnt / playedGamesCnt;
     }
 
+    @JsonIgnore
     public String getDetailedScore() {
         return String.valueOf(getFitness()) + " (w: " + winCnt + ", l: " + loseCnt + ", d: " + drawCnt + ")";
     }
@@ -209,7 +211,7 @@ public class PlayingAgent {
     }
 
     public File store(final File dir) throws IOException {
-        return store(dir, "agent_" + winCnt + "-" + drawCnt + "-" + loseCnt + "_" + System.currentTimeMillis() + ".json");
+        return store(dir, "agent_" + winCnt + "-" + drawCnt + "-" + loseCnt + "_" + getName() + "-" + System.currentTimeMillis() + ".json");
     }
 
     public File store(final String filename) throws IOException {
