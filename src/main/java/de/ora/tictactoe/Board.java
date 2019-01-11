@@ -183,4 +183,12 @@ public abstract class Board {
     public int hashCode() {
         return Objects.hash(dimension, winCnt, board);
     }
+
+    public Coordinate findWinningMoveForPlayer(final Player player) {
+        if (playerToPiecesCnt.getOrDefault(player, 0) >= (winCnt - 1)) {
+
+        }
+
+        return null;
+    }
 }

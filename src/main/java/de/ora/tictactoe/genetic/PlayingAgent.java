@@ -120,6 +120,7 @@ public class PlayingAgent {
                 break;
             case LOST:
                 this.loseCnt++;
+                this.moves.remove(this.lastMoveKey); // discard really bad moves
                 break;
             case DRAW:
                 this.drawMoveKeys.add(lastMoveKey);
