@@ -8,29 +8,22 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class Tournament {
-    private static final Logger LOG = Logger.getLogger(Tournament.class.getSimpleName());
+public class TrainerTournament {
+    private static final Logger LOG = Logger.getLogger(TrainerTournament.class.getSimpleName());
     private static final int POPULATION_SIZE = 1000;
     private List<PlayingAgent> population = new ArrayList<>();
     int epoch = 0;
     private double avgFitness;
     private Random rnd;
-    private final static File agentDir = new File("tournament/agents/");
+    private final static File agentDir = new File("tournament/trainer/");
 
-    public Tournament() {
+    public TrainerTournament() {
         rnd = new Random();
     }
 
     public static void main(String[] args) throws IOException {
-        Tournament tournament = new Tournament();
-        if (args.length == 1) {
-            if (args[0].equalsIgnoreCase("random")) {
-                tournament.createPopulation(POPULATION_SIZE);
-            } else if (args[0].equalsIgnoreCase("load")) {
-                tournament.loadPopulation(agentDir);
-            }
-        }
-
+        TrainerTournament tournament = new TrainerTournament();
+        tournament.createPopulation(POPULATION_SIZE);
         tournament.start();
     }
 
@@ -38,39 +31,30 @@ public class Tournament {
     private void start() throws IOException {
         boolean isRunning = true;
 
+        ThreeXThreeBoard board = new ThreeXThreeBoard();
+        Trainer trainer = new Trainer(board);
+        double bestScore = 0;
+
         while (isRunning) {
             int gamesPlayed = 0;
-            fillPopulation(POPULATION_SIZE);
             LOG.info("Tournament " + (++epoch) + " size: " + population.size());
             Stopwatch stopwatch = Stopwatch.createStarted();
-            Board board = new ThreeXThreeBoard();
 
-            for (int i = 0; i < population.size(); i++) {
-                PlayingAgent playingAgent = population.get(i);
-                for (int j = 0; j < population.size(); j++) {
-                    if (i != j) {
-                        PlayingAgent opponent = population.get(j);
+            boolean trainerStarts = false;
+            board = new ThreeXThreeBoard();
 
-                        Player winner = play(board, playingAgent, opponent);
-                        gamesPlayed++;
-                        switch (winner) {
-                            case PLAYER1:
-                                playingAgent.feedback(GameResult.WON);
-                                opponent.feedback(GameResult.LOST);
-                                break;
-                            case PLAYER2:
-                                playingAgent.feedback(GameResult.LOST);
-                                opponent.feedback(GameResult.WON);
-                                break;
-                            case NONE:
-                                playingAgent.feedback(GameResult.DRAW);
-                                opponent.feedback(GameResult.DRAW);
-                                break;
-                        }
+            for (PlayingAgent agent : population) {
 
-                    }
+                for (int i = 0; i < 3000; i++) {
+                    Player winner = play(board, trainer, agent);
+                    notifyPlayers(winner, trainer, agent);
+                    gamesPlayed++;
+                    winner = play(board, agent, trainer);
+                    notifyPlayers(winner, agent, trainer);
+                    gamesPlayed++;
                 }
             }
+
             LOG.info("Done @ " + stopwatch.toString() + ". Games played: " + gamesPlayed);
             // Sort best performers to start of list
             Collections.sort(population, new Comparator<PlayingAgent>() {
@@ -91,7 +75,20 @@ public class Tournament {
             avgFitness = avgFitness / population.size();
 
             PlayingAgent bestAgent = population.get(0);
-            if (bestAgent.getFitness() == 1.0) {
+            double fitness = bestAgent.getFitness();
+            if (fitness > bestScore) {
+                bestScore = fitness;
+                if (bestScore > 0.99) {
+                    File agentDir2 = new File("tournament/trainer/" + fitness);
+                    agentDir2.mkdirs();
+                    for (int i = 0; i < 20; i++) {
+                        PlayingAgent agent = population.get(i);
+                        agent.store(agentDir2);
+                    }
+                }
+            }
+
+            if (fitness == 1.0) {
                 break;
             }
 
@@ -147,15 +144,48 @@ public class Tournament {
             fillPopulation(POPULATION_SIZE);
         }
         LOG.info("Tournament done.");
-        File agentDir2 = new File("tournament/agents/ng/");
+        File agentDir2 = new File("tournament/trainer/ng/");
         agentDir2.mkdirs();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             PlayingAgent agent = population.get(i);
             agent.store(agentDir2);
         }
-        population.clear();
-        fillPopulation(POPULATION_SIZE);
-        start();
+
+    }
+
+    private void notifyPlayers(Player winner, PlayingAgent player1, PlayingAgent player2) {
+        switch (winner) {
+            case PLAYER1:
+                player1.feedback(GameResult.WON);
+                player2.feedback(GameResult.LOST);
+                break;
+            case PLAYER2:
+                player1.feedback(GameResult.LOST);
+                player2.feedback(GameResult.WON);
+                break;
+            case NONE:
+                player1.feedback(GameResult.DRAW);
+                player2.feedback(GameResult.DRAW);
+                break;
+        }
+    }
+
+    private void createPopulation(int size) {
+        for (int i = 0; i < size; i++) {
+            population.add(new PlayingAgent("a" + i));
+        }
+    }
+
+    private void fillPopulation(int size) {
+        int diff = population.size() - size;
+        if (diff >= 0) {
+            return;
+        }
+        diff = Math.abs(diff);
+
+        for (int i = 0; i < diff; i++) {
+            population.add(new PlayingAgent("a" + i));
+        }
     }
 
     private Player play(Board board, PlayingAgent playingAgent, PlayingAgent opponent) {
@@ -190,24 +220,6 @@ public class Tournament {
         return Player.NONE;
     }
 
-    private void createPopulation(int size) {
-        for (int i = 0; i < size; i++) {
-            population.add(new PlayingAgent("a" + i));
-        }
-    }
-
-    private void fillPopulation(int size) {
-        int diff = population.size() - size;
-        if (diff >= 0) {
-            return;
-        }
-        diff = Math.abs(diff);
-
-        for (int i = 0; i < diff; i++) {
-            population.add(new PlayingAgent("a" + i));
-        }
-    }
-
     private PlayingAgent combine(PlayingAgent one, PlayingAgent two) {
         if (rnd.nextBoolean()) {
             return new PlayingAgent(one, two);
@@ -219,9 +231,6 @@ public class Tournament {
     private void loadPopulation(final File agentDir) throws IOException {
         File[] files = agentDir.listFiles();
         for (File file : files) {
-            if (file.isDirectory()) {
-                continue;
-            }
             population.add(PlayingAgent.load(file, PlayingAgent.class));
         }
     }

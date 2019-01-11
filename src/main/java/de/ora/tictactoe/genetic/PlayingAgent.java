@@ -14,9 +14,9 @@ import java.util.*;
 public class PlayingAgent {
     private String name;
     private int generation;
-    private Map<String, List<Coordinate>> moves = new HashMap<>();
+    protected Map<String, List<Coordinate>> moves = new HashMap<>();
     @JsonIgnore
-    private Random rnd = new Random();
+    protected Random rnd = new Random();
     private int winCnt = 0;
     private int loseCnt = 0;
     private int drawCnt = 0;
@@ -94,18 +94,22 @@ public class PlayingAgent {
         }
 
         if (possibleMoves.isEmpty()) {
-            List<Coordinate> freeCells = board.freeCells();
-            if (freeCells.size() > 0) {
-                // choose randomly one move
-                possibleMoves.add(freeCells.get(rnd.nextInt(freeCells.size())));
-            } else {
-                throw new IllegalArgumentException("No free cell left on board for move!");
-            }
+            possibleMoves.add(createRandomMove(board));
         }
 
         Coordinate coordinate = possibleMoves.get(0);
         this.lastMoveKey = key;
         return coordinate;
+    }
+
+    protected Coordinate createRandomMove(Board board) {
+        List<Coordinate> freeCells = board.freeCells();
+        if (freeCells.size() > 0) {
+            // choose randomly one move
+            return freeCells.get(rnd.nextInt(freeCells.size()));
+        } else {
+            throw new IllegalArgumentException("No free cell left on board for move!");
+        }
     }
 
     public void feedback(final GameResult result) {
@@ -159,11 +163,9 @@ public class PlayingAgent {
             return;
         }
 
-        while (kidsMoves.size() < parentMovesSize) {
-            for (Map.Entry<String, List<Coordinate>> entry : parentMoves.entrySet()) {
-                if (!kidsMoves.containsKey(entry.getKey())) {
-                    kidsMoves.put(entry.getKey(), entry.getValue());
-                }
+        for (Map.Entry<String, List<Coordinate>> entry : parentMoves.entrySet()) {
+            if (!kidsMoves.containsKey(entry.getKey())) {
+                kidsMoves.put(entry.getKey(), entry.getValue());
             }
         }
     }
@@ -219,17 +221,17 @@ public class PlayingAgent {
         return store(file);
     }
 
-    public static PlayingAgent load(final File file) throws IOException {
+    public static PlayingAgent load(final File file, final Class<? extends PlayingAgent> type) throws IOException {
         if (!file.exists() || !file.canRead()) {
             return null;
         }
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(file, PlayingAgent.class);
+        return mapper.readValue(file, type);
     }
 
-    public static PlayingAgent load(final String filename) throws IOException {
+    public static PlayingAgent load(final String filename, final Class<? extends PlayingAgent> type) throws IOException {
         File file = new File(filename + ".json");
-        return load(file);
+        return load(file, type);
     }
 
     public Map<String, List<Coordinate>> getMoves() {

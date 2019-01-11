@@ -109,6 +109,19 @@ public abstract class Board {
         return player1Cnt < winCnt && player2Cnt < winCnt;
     }
 
+    public int getPlayedPiecesCount() {
+        int sum = 0;
+        for (Integer cnt : playerToPiecesCnt.values()) {
+            if (cnt == null) {
+                continue;
+            }
+
+            sum += cnt;
+        }
+
+        return sum;
+    }
+
     protected abstract Player findDiagonalWinner();
 
     public Player activePlayer() {
