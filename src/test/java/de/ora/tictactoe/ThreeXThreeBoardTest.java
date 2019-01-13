@@ -78,6 +78,22 @@ public class ThreeXThreeBoardTest {
         System.out.println(board);
     }
 
+    @Test
+    public void testToFromKey() {
+        Board board = new ThreeXThreeBoard();
+        String key = board.asKey();
+        Board createdBoard = Board.fromKey(key);
+
+        Assert.assertEquals(board, createdBoard);
+
+        board = new ThreeXThreeBoard();
+        board.board.initWith(3);
+        key = board.asKey();
+        createdBoard = Board.fromKey(key);
+
+        Assert.assertEquals(board, createdBoard);
+    }
+
     public <T> T pickRandomItem(List<T> items) {
         return items.get(new Random().nextInt(items.size()));
     }

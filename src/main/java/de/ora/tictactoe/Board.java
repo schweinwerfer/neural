@@ -1,13 +1,14 @@
 package de.ora.tictactoe;
 
-import de.ora.neural.core.net.Matrix;
+import de.ora.neural.core.net.GenericMatrix;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 
 public abstract class Board {
     private int dimension;
     protected int winCnt;
-    protected Matrix board;
+    protected GenericMatrix<Integer> board;
     private Player activePlayer;
     private Map<Player, Integer> playerToPiecesCnt = new HashMap<>();
 
@@ -26,7 +27,7 @@ public abstract class Board {
     }
 
     public void reset() {
-        board = new Matrix(dimension, dimension).initWith(Player.NONE.getCode());
+        board = new GenericMatrix<>(dimension, dimension).initWith(Player.NONE.getCode());
         playerToPiecesCnt = new HashMap<>();
         activePlayer = Player.PLAYER1;
     }
@@ -34,9 +35,10 @@ public abstract class Board {
     public List<Coordinate> freeCells() {
         List<Coordinate> result = new ArrayList<>();
         for (int y = 0; y < board.data.length; y++) {
-            double[] row = board.data[y];
+            Object[] row = board.getRow(y);
             for (int x = 0; x < row.length; x++) {
-                if (row[x] == 0) {
+                Integer value = (Integer) row[x];
+                if (value == 0) {
                     result.add(new Coordinate(y, x));
                 }
             }
@@ -53,18 +55,19 @@ public abstract class Board {
         int currentCnt = 0;
 
         // columns
-        for (int c = 0; c < board.getColumns(); c++) {
+        for (int c = 0; c < board.getColumnCount(); c++) {
             currentCode = Player.NONE.getCode();
             currentCnt = 0;
-            for (Double value : board.getColumn(c).getData()) {
-                if (value != Player.NONE.getCode()) {
-                    if (value.intValue() == currentCode) {
+            for (Object value : board.getColumn(c)) {
+                Integer intValue = (Integer) value;
+                if (intValue != Player.NONE.getCode()) {
+                    if (intValue.intValue() == currentCode) {
                         currentCnt++;
                         if (currentCnt == winCnt) {
                             return Player.from(currentCode);
                         }
                     } else {
-                        currentCode = value.intValue();
+                        currentCode = intValue.intValue();
                         currentCnt = 1;
                     }
                 } else {
@@ -78,18 +81,19 @@ public abstract class Board {
         currentCnt = 0;
 
         // rows
-        for (double[] row : board.data) {
+        for (Object[] row : board.getRows()) {
             currentCode = Player.NONE.getCode();
             currentCnt = 0;
-            for (Double value : row) {
-                if (value != Player.NONE.getCode()) {
-                    if (value.intValue() == currentCode) {
+            for (Object value : row) {
+                Integer intValue = (Integer) value;
+                if (intValue != Player.NONE.getCode()) {
+                    if (intValue.intValue() == currentCode) {
                         currentCnt++;
                         if (currentCnt == winCnt) {
                             return Player.from(currentCode);
                         }
                     } else {
-                        currentCode = value.intValue();
+                        currentCode = intValue.intValue();
                         currentCnt = 1;
                     }
                 } else {
@@ -129,7 +133,7 @@ public abstract class Board {
     }
 
     public boolean set(int row, int column) {
-        double existing = board.set(row, column, activePlayer.getCode());
+        Integer existing = board.set(row, column, activePlayer.getCode());
         if (existing != 0) {
             board.set(row, column, existing);
             return false;
@@ -143,9 +147,9 @@ public abstract class Board {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(activePlayer.name()).append(System.lineSeparator());
-        for (double[] row : this.board.data) {
-            for (double cell : row) {
+        StringBuilder sb = new StringBuilder().append(activePlayer.name()).append(System.lineSeparator());
+        for (Object[] row : this.board.getRows()) {
+            for (Object cell : row) {
                 sb.append(cell).append(' ');
             }
             sb.deleteCharAt(sb.length() - 1);
@@ -156,10 +160,10 @@ public abstract class Board {
     }
 
     public String asKey() {
-        StringBuilder sb = new StringBuilder(activePlayer.name()).append("|");
-        sb.append(this.board.getRows()).append(',').append(this.board.getColumns()).append("|");
-        for (double[] row : this.board.data) {
-            for (double cell : row) {
+        StringBuilder sb = new StringBuilder().append(activePlayer.getCode()).append("|");
+        sb.append(this.board.getRowCount()).append(',').append(this.board.getColumnCount()).append("|");
+        for (Object[] row : this.board.getRows()) {
+            for (Object cell : row) {
                 sb.append(cell).append(',');
             }
         }
@@ -170,7 +174,7 @@ public abstract class Board {
 
     public static Board fromKey(final String key) {
         Board result = new ThreeXThreeBoard();
-        String[] parts = key.split("|");
+        String[] parts = StringUtils.split(key, "|");
         Player player = Player.from(Integer.valueOf(parts[0]));
         String[] dimensionsString = parts[1].split(",");
         int rows = Integer.valueOf(dimensionsString[0]);
@@ -180,7 +184,7 @@ public abstract class Board {
         int i = 0;
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < columns; c++) {
-                double value = Double.valueOf(cellsString[i++]);
+                Integer value = Integer.valueOf(cellsString[i++]);
                 result.board.set(r, c, value);
             }
         }

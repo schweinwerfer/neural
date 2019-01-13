@@ -15,7 +15,7 @@ public class ThreeXThreeBoard extends Board {
         int currentCnt = 0;
 
         for (int row = 0; row < board.data.length; row++) {
-            Double value = board.getRawCell(row, row);
+            Integer value = board.getRawCell(row, row);
             int intValue = value.intValue();
             if (intValue == Player.NONE.getCode()) {
                 currentCode = Player.NONE.getCode();
@@ -37,7 +37,7 @@ public class ThreeXThreeBoard extends Board {
         currentCnt = 0;
 
         for (int row = 0; row < board.data.length; row++) {
-            Double value = board.getRawCell(row, 2 - row);
+            Integer value = board.getRawCell(row, 2 - row);
             int intValue = value.intValue();
             if (intValue == Player.NONE.getCode()) {
                 currentCode = Player.NONE.getCode();
