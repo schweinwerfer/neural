@@ -74,6 +74,5 @@ public class Trainer extends PlayingAgent {
 
     @Override
     public void feedback(GameResult result) {
-
     }
 }

@@ -143,14 +143,6 @@ public abstract class Board {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Active Player: ").append(activePlayer).append(System.lineSeparator());
-        sb.append(board);
-
-        return sb.toString();
-    }
-
-    public String asKey() {
         StringBuilder sb = new StringBuilder(activePlayer.name()).append(System.lineSeparator());
         for (double[] row : this.board.data) {
             for (double cell : row) {
@@ -161,6 +153,40 @@ public abstract class Board {
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
+    }
+
+    public String asKey() {
+        StringBuilder sb = new StringBuilder(activePlayer.name()).append("|");
+        sb.append(this.board.getRows()).append(',').append(this.board.getColumns()).append("|");
+        for (double[] row : this.board.data) {
+            for (double cell : row) {
+                sb.append(cell).append(',');
+            }
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+    }
+
+
+    public static Board fromKey(final String key) {
+        Board result = new ThreeXThreeBoard();
+        String[] parts = key.split("|");
+        Player player = Player.from(Integer.valueOf(parts[0]));
+        String[] dimensionsString = parts[1].split(",");
+        int rows = Integer.valueOf(dimensionsString[0]);
+        int columns = Integer.valueOf(dimensionsString[1]);
+        String[] cellsString = parts[2].split(",");
+
+        int i = 0;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < columns; c++) {
+                double value = Double.valueOf(cellsString[i++]);
+                result.board.set(r, c, value);
+            }
+        }
+
+
+        return result;
     }
 
     public abstract Board copy();
