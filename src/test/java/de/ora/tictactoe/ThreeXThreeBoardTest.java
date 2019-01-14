@@ -85,6 +85,7 @@ public class ThreeXThreeBoardTest {
         Board createdBoard = Board.fromKey(key);
 
         Assert.assertEquals(board, createdBoard);
+        Assert.assertEquals(board.activePlayer(), createdBoard.activePlayer());
 
         board = new ThreeXThreeBoard();
         board.board.initWith(3);
@@ -92,6 +93,15 @@ public class ThreeXThreeBoardTest {
         createdBoard = Board.fromKey(key);
 
         Assert.assertEquals(board, createdBoard);
+        Assert.assertEquals(board.activePlayer(), createdBoard.activePlayer());
+
+        board = new ThreeXThreeBoard();
+        board.set(new Coordinate(0, 0));
+        key = board.asKey();
+        createdBoard = Board.fromKey(key);
+
+        Assert.assertEquals(board, createdBoard);
+        Assert.assertEquals(board.activePlayer(), createdBoard.activePlayer());
     }
 
     public <T> T pickRandomItem(List<T> items) {

@@ -12,10 +12,6 @@ public class DynamicPlayingAgent extends PlayingAgent {
         super(name);
     }
 
-    public DynamicPlayingAgent(PlayingAgent father, PlayingAgent mother) {
-        super(father, mother);
-    }
-
     @Override
     public Coordinate play(Player player, Board board) {
         int playedPiecesCount = board.getPlayedPiecesCount();

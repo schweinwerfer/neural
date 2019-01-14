@@ -9,6 +9,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 public class PlayingAgent {
@@ -35,7 +36,7 @@ public class PlayingAgent {
         this.generation = 1;
     }
 
-    public PlayingAgent(final PlayingAgent father, final PlayingAgent mother) {
+    private PlayingAgent(final PlayingAgent father, final PlayingAgent mother) {
         this.generation = ((father.generation + mother.generation) / 2) + 1;
         this.name = Math.abs((father.name + mother.name).hashCode()) + "-" + this.generation;
 
@@ -57,13 +58,25 @@ public class PlayingAgent {
             fillWithMissingMoves(this.moves, mother.moves);
         }
 
-        if (rnd.nextInt(100) % 42 == 0) {
-            Set<String> keysSet = this.moves.keySet();
-            List<String> keys = new ArrayList<String>();
-            keys.addAll(keysSet);
+
+    }
+
+    public PlayingAgent combine(final PlayingAgent other) {
+        if (rnd.nextBoolean()) {
+            return new PlayingAgent(this, other);
+        } else {
+            return new PlayingAgent(other, this);
+        }
+    }
+
+    public PlayingAgent mutate() {
+        int mutations = rnd.nextInt(10);
+        final List<String> keys = new ArrayList<String>(this.moves.keySet());
+        for (int i = 0; i < mutations; i++) {
             this.moves.remove(keys.get(rnd.nextInt(keys.size())));
         }
 
+        return this;
     }
 
     private void addDrawMoves(final Map<String, List<Coordinate>> kidsMoves) {
@@ -233,6 +246,11 @@ public class PlayingAgent {
     public static PlayingAgent load(final String filename, final Class<? extends PlayingAgent> type) throws IOException {
         File file = new File(filename + ".json");
         return load(file, type);
+    }
+
+    public static PlayingAgent load(final InputStream stream) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(stream, PlayingAgent.class);
     }
 
     public Map<String, List<Coordinate>> getMoves() {

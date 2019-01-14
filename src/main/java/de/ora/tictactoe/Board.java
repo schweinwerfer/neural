@@ -189,14 +189,23 @@ public abstract class Board {
             }
         }
 
+        result.setActivePlayer(player);
 
         return result;
+    }
+
+    private void setActivePlayer(Player player) {
+        this.activePlayer = player;
     }
 
     public abstract Board copy();
 
     public boolean set(final Coordinate move) {
         return this.set(move.row, move.column);
+    }
+
+    public Integer get(int row, int column) {
+        return board.getRawCell(row, column);
     }
 
     @Override

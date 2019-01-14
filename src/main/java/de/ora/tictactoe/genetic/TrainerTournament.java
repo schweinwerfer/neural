@@ -6,19 +6,11 @@ import de.ora.util.Stopwatch;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.logging.Logger;
 
-public class TrainerTournament {
-    private static final Logger LOG = Logger.getLogger(TrainerTournament.class.getSimpleName());
-    private static final int POPULATION_SIZE = 1000;
-    private List<PlayingAgent> population = new ArrayList<>();
-    int epoch = 0;
-    private double avgFitness;
-    private Random rnd;
-    private final static File agentDir = new File("tournament/trainer/");
+public class TrainerTournament extends ATournament {
 
     public TrainerTournament() {
-        rnd = new Random();
+        super(new File("tournament/trainer/"));
     }
 
     public static void main(String[] args) throws IOException {
@@ -27,7 +19,6 @@ public class TrainerTournament {
         tournament.start();
     }
 
-
     private void start() throws IOException {
         boolean isRunning = true;
 
@@ -35,20 +26,61 @@ public class TrainerTournament {
         Trainer trainer = new Trainer(board);
         double bestScore = 0;
 
+        Set<String> boardConfigs = new HashSet<>();
+        Set<String> playConfigs = new HashSet<>();
+
+        Set<Map.Entry<String, List<Coordinate>>> entries = trainer.getMoves().entrySet();
+
+        for (Map.Entry<String, List<Coordinate>> entry : entries) {
+            List<Coordinate> moves = entry.getValue();
+            if (moves.isEmpty() || moves.size() == 1) {
+                continue; // nicht interessant
+            }
+
+            if (moves.size() == 2) {
+                // interessant für ein spiel
+                playConfigs.add(entry.getKey());
+                continue;
+            }
+
+            boardConfigs.add(entry.getKey());
+        }
+
         while (isRunning) {
             int gamesPlayed = 0;
             LOG.info("Tournament " + (++epoch) + " size: " + population.size());
             Stopwatch stopwatch = Stopwatch.createStarted();
 
-            boolean trainerStarts = false;
-            board = new ThreeXThreeBoard();
-
             for (PlayingAgent agent : population) {
 
-                for (int i = 0; i < 3000; i++) {
+                for (String boardConfig : boardConfigs) {
+                    Board config = Board.fromKey(boardConfig);
+                    Player player = config.activePlayer();
+                    Coordinate move = agent.play(player, config);
+                    config.set(move);
+                    Player winner = config.findWinner();
+                    switch (winner) {
+
+                        case NONE:
+                            if (config.freeCells().isEmpty()) {
+                                agent.feedback(GameResult.DRAW);
+                            }
+                            break;
+
+                        default:
+                            agent.feedback(winner == player ? GameResult.WON : GameResult.LOST);
+                            break;
+                    }
+                    gamesPlayed++;
+                }
+
+                for (String playConfig : playConfigs) {
+                    Board config = Board.fromKey(playConfig);
                     Player winner = play(board, trainer, agent);
                     notifyPlayers(winner, trainer, agent);
                     gamesPlayed++;
+
+                    config = Board.fromKey(playConfig);
                     winner = play(board, agent, trainer);
                     notifyPlayers(winner, agent, trainer);
                     gamesPlayed++;
@@ -79,12 +111,7 @@ public class TrainerTournament {
             if (fitness > bestScore) {
                 bestScore = fitness;
                 if (bestScore > 0.99) {
-                    File agentDir2 = new File("tournament/trainer/" + fitness);
-                    agentDir2.mkdirs();
-                    for (int i = 0; i < 20; i++) {
-                        PlayingAgent agent = population.get(i);
-                        agent.store(agentDir2);
-                    }
+                    doAfterTournament("tournament/trainer/tmp/" + fitness);
                 }
             }
 
@@ -94,48 +121,10 @@ public class TrainerTournament {
 
             LOG.info(("Tournament " + epoch + " end. best: " + bestAgent.getDetailedScore() + " avg: " + avgFitness + " worst: " + population.get(population.size() - 1).getDetailedScore()));
 
-            // pick 20 of the best
-            List<PlayingAgent> breedPool = new ArrayList<>();
-            Iterator<PlayingAgent> iterator = population.iterator();
-            int pickCnt = 100;
-
-            while (pickCnt > 0 && iterator.hasNext()) {
-                PlayingAgent picked = iterator.next();
-                iterator.remove();
-                breedPool.add(picked);
-                pickCnt--;
-            }
-
-            // pick 5 from the rest randomly
-            pickCnt = 10;
-            while (pickCnt > 0) {
-                PlayingAgent playingAgent = population.get(rnd.nextInt(population.size()));
-                if (!breedPool.contains(playingAgent)) {
-                    breedPool.add(playingAgent);
-                    pickCnt--;
-                }
-            }
-
+            List<PlayingAgent> breedPool = pickBest();
             population.clear();
+            breed(breedPool);
 
-            // breed
-            int lastWinner = -1;
-            for (int i = 0; i < breedPool.size(); i++) {
-                for (int j = 0; j < breedPool.size(); j++) {
-                    if (population.size() >= POPULATION_SIZE) {
-                        break;
-                    }
-
-                    boolean breed = rnd.nextBoolean();
-                    if (i != j && breed) {
-                        population.add(combine(breedPool.get(i), breedPool.get(j)));
-                    }
-                    if (lastWinner != i && i < 100) {
-                        population.add(breedPool.get(i)); // add old winners
-                        lastWinner = i;
-                    }
-                }
-            }
 
             for (PlayingAgent playingAgent : population) {
                 playingAgent.resetScore();
@@ -144,12 +133,7 @@ public class TrainerTournament {
             fillPopulation(POPULATION_SIZE);
         }
         LOG.info("Tournament done.");
-        File agentDir2 = new File("tournament/trainer/ng/");
-        agentDir2.mkdirs();
-        for (int i = 0; i < 20; i++) {
-            PlayingAgent agent = population.get(i);
-            agent.store(agentDir2);
-        }
+        doAfterTournament("tournament/trainer/ng2/");
 
     }
 
@@ -167,24 +151,6 @@ public class TrainerTournament {
                 player1.feedback(GameResult.DRAW);
                 player2.feedback(GameResult.DRAW);
                 break;
-        }
-    }
-
-    private void createPopulation(int size) {
-        for (int i = 0; i < size; i++) {
-            population.add(new PlayingAgent("a" + i));
-        }
-    }
-
-    private void fillPopulation(int size) {
-        int diff = population.size() - size;
-        if (diff >= 0) {
-            return;
-        }
-        diff = Math.abs(diff);
-
-        for (int i = 0; i < diff; i++) {
-            population.add(new PlayingAgent("a" + i));
         }
     }
 
@@ -220,18 +186,5 @@ public class TrainerTournament {
         return Player.NONE;
     }
 
-    private PlayingAgent combine(PlayingAgent one, PlayingAgent two) {
-        if (rnd.nextBoolean()) {
-            return new PlayingAgent(one, two);
-        } else {
-            return new PlayingAgent(two, one);
-        }
-    }
 
-    private void loadPopulation(final File agentDir) throws IOException {
-        File[] files = agentDir.listFiles();
-        for (File file : files) {
-            population.add(PlayingAgent.load(file, PlayingAgent.class));
-        }
-    }
 }

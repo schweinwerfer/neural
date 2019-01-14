@@ -5,20 +5,14 @@ import de.ora.util.Stopwatch;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
-public class Tournament {
-    private static final Logger LOG = Logger.getLogger(Tournament.class.getSimpleName());
-    private static final int POPULATION_SIZE = 1000;
-    private List<PlayingAgent> population = new ArrayList<>();
-    int epoch = 0;
-    private double avgFitness;
-    private Random rnd;
-    private final static File agentDir = new File("tournament/agents/");
+public class Tournament extends ATournament {
 
     public Tournament() {
-        rnd = new Random();
+        super(new File("tournament/agents/"));
     }
 
     public static void main(String[] args) throws IOException {
@@ -27,7 +21,7 @@ public class Tournament {
             if (args[0].equalsIgnoreCase("random")) {
                 tournament.createPopulation(POPULATION_SIZE);
             } else if (args[0].equalsIgnoreCase("load")) {
-                tournament.loadPopulation(agentDir);
+                tournament.loadPopulation();
             }
         }
 
@@ -97,48 +91,9 @@ public class Tournament {
 
             LOG.info(("Tournament " + epoch + " end. best: " + bestAgent.getDetailedScore() + " avg: " + avgFitness + " worst: " + population.get(population.size() - 1).getDetailedScore()));
 
-            // pick 20 of the best
-            List<PlayingAgent> breedPool = new ArrayList<>();
-            Iterator<PlayingAgent> iterator = population.iterator();
-            int pickCnt = 100;
-
-            while (pickCnt > 0 && iterator.hasNext()) {
-                PlayingAgent picked = iterator.next();
-                iterator.remove();
-                breedPool.add(picked);
-                pickCnt--;
-            }
-
-            // pick 5 from the rest randomly
-            pickCnt = 10;
-            while (pickCnt > 0) {
-                PlayingAgent playingAgent = population.get(rnd.nextInt(population.size()));
-                if (!breedPool.contains(playingAgent)) {
-                    breedPool.add(playingAgent);
-                    pickCnt--;
-                }
-            }
-
+            List<PlayingAgent> breedPool = pickBest();
             population.clear();
-
-            // breed
-            int lastWinner = -1;
-            for (int i = 0; i < breedPool.size(); i++) {
-                for (int j = 0; j < breedPool.size(); j++) {
-                    if (population.size() >= POPULATION_SIZE) {
-                        break;
-                    }
-
-                    boolean breed = rnd.nextBoolean();
-                    if (i != j && breed) {
-                        population.add(combine(breedPool.get(i), breedPool.get(j)));
-                    }
-                    if (lastWinner != i && i < 100) {
-                        population.add(breedPool.get(i)); // add old winners
-                        lastWinner = i;
-                    }
-                }
-            }
+            breed(breedPool);
 
             for (PlayingAgent playingAgent : population) {
                 playingAgent.resetScore();
@@ -190,39 +145,5 @@ public class Tournament {
         return Player.NONE;
     }
 
-    private void createPopulation(int size) {
-        for (int i = 0; i < size; i++) {
-            population.add(new PlayingAgent("a" + i));
-        }
-    }
 
-    private void fillPopulation(int size) {
-        int diff = population.size() - size;
-        if (diff >= 0) {
-            return;
-        }
-        diff = Math.abs(diff);
-
-        for (int i = 0; i < diff; i++) {
-            population.add(new PlayingAgent("a" + i));
-        }
-    }
-
-    private PlayingAgent combine(PlayingAgent one, PlayingAgent two) {
-        if (rnd.nextBoolean()) {
-            return new PlayingAgent(one, two);
-        } else {
-            return new PlayingAgent(two, one);
-        }
-    }
-
-    private void loadPopulation(final File agentDir) throws IOException {
-        File[] files = agentDir.listFiles();
-        for (File file : files) {
-            if (file.isDirectory()) {
-                continue;
-            }
-            population.add(PlayingAgent.load(file, PlayingAgent.class));
-        }
-    }
 }
