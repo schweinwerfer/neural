@@ -41,11 +41,11 @@ public abstract class ATournament {
                 }
 
                 int breed = rnd.nextInt(100);
-                if (i != j && breed <= 50) {
+                if (i != j && breed <= 45) {
                     population.add(breedPool.get(i).combine(breedPool.get(j)));
                 }
 
-                if (breed > 97) {
+                if (breed > 95) {
                     population.add(breedPool.get(i).mutate());
                 }
 
