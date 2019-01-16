@@ -76,6 +76,30 @@ public class ThreeXThreeBoardTest {
         board.set(2, 0);// 1
         Assert.assertEquals(Player.NONE, board.findWinner());
         System.out.println(board);
+
+        board.reset();
+        Assert.assertTrue(board.activePlayer() == Player.PLAYER1);
+        board.set(0, 0);//1
+        board.set(0, 1);//2
+        board.set(0, 2);//1
+        board.set(1, 0);//2
+        board.set(1, 2);//1
+        board.set(2, 1);//2
+        board.set(2, 2);//1
+        Assert.assertEquals(Player.PLAYER1, board.findWinner());
+        System.out.println(board);
+
+        board.reset();
+        Assert.assertTrue(board.activePlayer() == Player.PLAYER1);
+        board.set(0, 0);//1
+        board.set(0, 1);//2
+        board.set(0, 2);//1
+        board.set(1, 0);//2
+        board.set(1, 1);//1
+        board.set(2, 0);//2
+        board.set(2, 2);//1
+        Assert.assertEquals(Player.PLAYER1, board.findWinner());
+        System.out.println(board);
     }
 
     @Test

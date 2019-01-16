@@ -186,6 +186,11 @@ public abstract class Board {
             for (int c = 0; c < columns; c++) {
                 Integer value = Integer.valueOf(cellsString[i++]);
                 result.board.set(r, c, value);
+                Player activePlayer = Player.from(value);
+                if (activePlayer != Player.NONE) {
+                    result.playerToPiecesCnt.putIfAbsent(activePlayer, 0);
+                    result.playerToPiecesCnt.computeIfPresent(activePlayer, (k, v) -> ++v);
+                }
             }
         }
 

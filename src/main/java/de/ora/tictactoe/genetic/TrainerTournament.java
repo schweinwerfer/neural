@@ -24,6 +24,7 @@ public class TrainerTournament extends ATournament {
 
         ThreeXThreeBoard board = new ThreeXThreeBoard();
         Trainer trainer = new Trainer(board);
+        LinearTrainer linearTrainer = new LinearTrainer(board);
         double bestScore = 0;
 
         Set<String> boardConfigs = new HashSet<>();
@@ -33,11 +34,12 @@ public class TrainerTournament extends ATournament {
 
         for (Map.Entry<String, List<Coordinate>> entry : entries) {
             List<Coordinate> moves = entry.getValue();
-            if (moves.isEmpty() || moves.size() == 1) {
+            int size = moves.size();
+            if (moves.isEmpty() || size == 1) {
                 continue; // nicht interessant
             }
 
-            if (moves.size() == 2) {
+            if (size >= 2 && size <= 8) {
                 // interessant für ein spiel
                 playConfigs.add(entry.getKey());
                 continue;
@@ -51,40 +53,52 @@ public class TrainerTournament extends ATournament {
             LOG.info("Tournament " + (++epoch) + " size: " + population.size());
             Stopwatch stopwatch = Stopwatch.createStarted();
 
-            for (PlayingAgent agent : population) {
+            for (int i = 0; i < population.size(); i++) {
+                PlayingAgent agent = population.get(i);
+                gamesPlayed = 0;
 
-                for (String boardConfig : boardConfigs) {
-                    Board config = Board.fromKey(boardConfig);
-                    Player player = config.activePlayer();
-                    Coordinate move = agent.play(player, config);
-                    config.set(move);
-                    Player winner = config.findWinner();
-                    switch (winner) {
-
-                        case NONE:
-                            if (config.freeCells().isEmpty()) {
-                                agent.feedback(GameResult.DRAW);
-                            }
-                            break;
-
-                        default:
-                            agent.feedback(winner == player ? GameResult.WON : GameResult.LOST);
-                            break;
-                    }
-                    gamesPlayed++;
-                }
+//                for (String boardConfig : boardConfigs) {
+//                    Board config = Board.fromKey(boardConfig);
+//                    Player player = config.activePlayer();
+//                    Coordinate move = agent.play(player, config);
+//                    config.set(move);
+//                    Player winner = config.findWinner();
+//                    switch (winner) {
+//
+//                        case NONE:
+//                            if (config.freeCells().isEmpty()) {
+//                                agent.feedback(GameResult.DRAW);
+//                            }
+//                            break;
+//
+//                        default:
+//                            agent.feedback(winner == player ? GameResult.WON : GameResult.LOST);
+//                            break;
+//                    }
+////                    gamesPlayed++;
+//                }
 
                 for (String playConfig : playConfigs) {
-                    Board config = Board.fromKey(playConfig);
-                    Player winner = play(board, trainer, agent);
-                    notifyPlayers(winner, trainer, agent);
-                    gamesPlayed++;
+                    for (int j = 0; j < 10; j++) {
+                        Board config = Board.fromKey(playConfig);
+                        Player winner = play(board, trainer, agent);
+                        notifyPlayers(winner, trainer, agent);
+                        gamesPlayed++;
 
-                    config = Board.fromKey(playConfig);
-                    winner = play(board, agent, trainer);
-                    notifyPlayers(winner, agent, trainer);
-                    gamesPlayed++;
+                        config = Board.fromKey(playConfig);
+                        winner = play(board, agent, trainer);
+                        notifyPlayers(winner, agent, trainer);
+                        gamesPlayed++;
+                    }
                 }
+
+//                for (String playConfig : playConfigs) {
+//                    play2(playConfig, linearTrainer, agent);
+//                    gamesPlayed += 2;
+//                }
+
+
+//                LOG.info("> Agent " + i + ", games " + gamesPlayed);
             }
 
             LOG.info("Done @ " + stopwatch.toString() + ". Games played: " + gamesPlayed);
@@ -186,5 +200,100 @@ public class TrainerTournament extends ATournament {
         return Player.NONE;
     }
 
+    private void play2(String boardKey, LinearTrainer trainer, PlayingAgent opponent) {
+        Board board = Board.fromKey(boardKey);
+        GameResultBean resultBean;
 
+        while (true) {
+            resultBean = playAndCheckMove(trainer, opponent, board);
+            if (resultBean.noMovesAvailable) {
+                break;
+            }
+            if (resultBean.gameEnded) {
+                board = Board.fromKey(boardKey);
+                resultBean = playAndCheckMove(trainer, opponent, board);
+                if (resultBean.noMovesAvailable) {
+                    break;
+                }
+            }
+            resultBean = playAndCheckMove(opponent, trainer, board);
+            if (resultBean.noMovesAvailable) {
+                break;
+            }
+            if (resultBean.gameEnded) {
+                board = Board.fromKey(boardKey);
+            }
+        }
+
+        board = Board.fromKey(boardKey);
+        trainer.reset();
+
+        while (true) {
+            resultBean = playAndCheckMove(opponent, trainer, board);
+            if (resultBean.noMovesAvailable) {
+                break;
+            }
+            if (resultBean.gameEnded) {
+                board = Board.fromKey(boardKey);
+            }
+            resultBean = playAndCheckMove(trainer, opponent, board);
+            if (resultBean.noMovesAvailable) {
+                break;
+            }
+            if (resultBean.gameEnded) {
+                board = Board.fromKey(boardKey);
+            }
+        }
+    }
+
+    private GameResultBean playAndCheckMove(PlayingAgent agent, PlayingAgent opponent, Board board) {
+        List<Coordinate> freeCells = board.freeCells();
+        Player activePlayer = board.activePlayer();
+        Player winner = board.findWinner();
+
+        if (freeCells.isEmpty() && winner == Player.NONE) {
+            // draw
+            notifyPlayers(winner, agent, opponent);
+            return new GameResultBean(true, false);
+        } else if (winner != Player.NONE) {
+            // winner
+            notifyPlayers(winner, activePlayer == Player.PLAYER1 ? agent : opponent, activePlayer == Player.PLAYER2 ? agent : opponent);
+            return new GameResultBean(true, false);
+        }
+
+        Coordinate move = agent.play(activePlayer, board);
+        if (move == null) {
+            return new GameResultBean(false, true);
+        }
+        boolean valid = board.set(move);
+        if (!valid) {
+            agent.feedback(GameResult.LOST);
+            return new GameResultBean(true, false);
+        }
+
+        winner = board.findWinner();
+        freeCells = board.freeCells();
+        if (freeCells.isEmpty() && winner == Player.NONE) {
+            // draw
+            notifyPlayers(winner, agent, opponent);
+            return new GameResultBean(true, false);
+        } else if (winner != Player.NONE) {
+            // winner
+            notifyPlayers(winner, activePlayer == Player.PLAYER1 ? agent : opponent, activePlayer == Player.PLAYER2 ? agent : opponent);
+            return new GameResultBean(true, false);
+        }
+
+        return new GameResultBean(false, false);
+    }
+
+
+    private class GameResultBean {
+        boolean gameEnded = false;
+        boolean noMovesAvailable = false;
+
+        public GameResultBean(boolean gameEnded, boolean noMovesAvailable) {
+            this.gameEnded = gameEnded;
+            this.noMovesAvailable = noMovesAvailable;
+        }
+    }
 }
