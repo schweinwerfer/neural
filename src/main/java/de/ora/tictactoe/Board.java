@@ -172,8 +172,8 @@ public abstract class Board {
     }
 
 
-    public static Board fromKey(final String key) {
-        Board result = new ThreeXThreeBoard();
+    public static Board fromKey(final Class<? extends Board> type, final String key) throws IllegalAccessException, InstantiationException {
+        Board result = type.newInstance();
         String[] parts = StringUtils.split(key, "|");
         Player player = Player.from(Integer.valueOf(parts[0]));
         String[] dimensionsString = parts[1].split(",");
@@ -211,6 +211,10 @@ public abstract class Board {
 
     public Integer get(int row, int column) {
         return board.getRawCell(row, column);
+    }
+
+    public int getDimension() {
+        return dimension;
     }
 
     @Override

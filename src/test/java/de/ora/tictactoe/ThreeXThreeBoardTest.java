@@ -103,10 +103,10 @@ public class ThreeXThreeBoardTest {
     }
 
     @Test
-    public void testToFromKey() {
+    public void testToFromKey() throws InstantiationException, IllegalAccessException {
         Board board = new ThreeXThreeBoard();
         String key = board.asKey();
-        Board createdBoard = Board.fromKey(key);
+        Board createdBoard = Board.fromKey(ThreeXThreeBoard.class, key);
 
         Assert.assertEquals(board, createdBoard);
         Assert.assertEquals(board.activePlayer(), createdBoard.activePlayer());
@@ -114,7 +114,7 @@ public class ThreeXThreeBoardTest {
         board = new ThreeXThreeBoard();
         board.board.initWith(3);
         key = board.asKey();
-        createdBoard = Board.fromKey(key);
+        createdBoard = Board.fromKey(ThreeXThreeBoard.class, key);
 
         Assert.assertEquals(board, createdBoard);
         Assert.assertEquals(board.activePlayer(), createdBoard.activePlayer());
@@ -122,7 +122,7 @@ public class ThreeXThreeBoardTest {
         board = new ThreeXThreeBoard();
         board.set(new Coordinate(0, 0));
         key = board.asKey();
-        createdBoard = Board.fromKey(key);
+        createdBoard = Board.fromKey(ThreeXThreeBoard.class, key);
 
         Assert.assertEquals(board, createdBoard);
         Assert.assertEquals(board.activePlayer(), createdBoard.activePlayer());

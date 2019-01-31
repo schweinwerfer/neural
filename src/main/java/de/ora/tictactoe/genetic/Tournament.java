@@ -12,7 +12,7 @@ import java.util.List;
 public class Tournament extends ATournament {
 
     public Tournament() {
-        super(new File("tournament/agents/"));
+        super(new File("tournament/classic/winners"));
     }
 
     public static void main(String[] args) throws IOException {
@@ -31,6 +31,7 @@ public class Tournament extends ATournament {
 
     private void start() throws IOException {
         boolean isRunning = true;
+        double bestScore = 0;
 
         while (isRunning) {
             int gamesPlayed = 0;
@@ -45,23 +46,24 @@ public class Tournament extends ATournament {
                     if (i != j) {
                         PlayingAgent opponent = population.get(j);
 
-                        Player winner = play(board, playingAgent, opponent);
-                        gamesPlayed++;
-                        switch (winner) {
-                            case PLAYER1:
-                                playingAgent.feedback(GameResult.WON);
-                                opponent.feedback(GameResult.LOST);
-                                break;
-                            case PLAYER2:
-                                playingAgent.feedback(GameResult.LOST);
-                                opponent.feedback(GameResult.WON);
-                                break;
-                            case NONE:
-                                playingAgent.feedback(GameResult.DRAW);
-                                opponent.feedback(GameResult.DRAW);
-                                break;
+                        for (int k = 0; k < 10; k++) {
+                            Player winner = play(board, playingAgent, opponent);
+                            gamesPlayed++;
+                            switch (winner) {
+                                case PLAYER1:
+                                    playingAgent.feedback(GameResult.WON);
+                                    opponent.feedback(GameResult.LOST);
+                                    break;
+                                case PLAYER2:
+                                    playingAgent.feedback(GameResult.LOST);
+                                    opponent.feedback(GameResult.WON);
+                                    break;
+                                case NONE:
+                                    playingAgent.feedback(GameResult.DRAW);
+                                    opponent.feedback(GameResult.DRAW);
+                                    break;
+                            }
                         }
-
                     }
                 }
             }
@@ -85,6 +87,13 @@ public class Tournament extends ATournament {
             avgFitness = avgFitness / population.size();
 
             PlayingAgent bestAgent = population.get(0);
+            double fitness = bestAgent.getFitness();
+            if (fitness > bestScore) {
+                bestScore = fitness;
+                if (bestScore > 0.99) {
+                    doAfterTournament("tournament/classic/tmp/" + fitness);
+                }
+            }
             if (bestAgent.getFitness() == 1.0) {
                 break;
             }
@@ -102,7 +111,7 @@ public class Tournament extends ATournament {
             fillPopulation(POPULATION_SIZE);
         }
         LOG.info("Tournament done.");
-        File agentDir2 = new File("tournament/agents/ng/");
+        File agentDir2 = new File("tournament/classic/winners/");
         agentDir2.mkdirs();
         for (int i = 0; i < 10; i++) {
             PlayingAgent agent = population.get(i);

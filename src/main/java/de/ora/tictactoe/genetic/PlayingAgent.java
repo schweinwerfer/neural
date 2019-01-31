@@ -100,11 +100,13 @@ public class PlayingAgent {
         }
 
         final String key = board.asKey();
-        List<Coordinate> possibleMoves = moves.get(key);
-        if (possibleMoves == null) {
-            possibleMoves = new ArrayList<>();
-            moves.put(key, possibleMoves);
-        }
+        List<Coordinate> possibleMoves = this.moves.computeIfAbsent(key, k ->
+                {
+                    LinkedList<Coordinate> coordinates = new LinkedList<>();
+                    coordinates.add(createRandomMove(board));
+                    return coordinates;
+                }
+        );
 
         if (possibleMoves.isEmpty()) {
             possibleMoves.add(createRandomMove(board));
@@ -178,8 +180,9 @@ public class PlayingAgent {
         }
 
         for (Map.Entry<String, List<Coordinate>> entry : parentMoves.entrySet()) {
-            if (!kidsMoves.containsKey(entry.getKey())) {
-                kidsMoves.put(entry.getKey(), entry.getValue());
+            String key = entry.getKey();
+            if (key != null && !kidsMoves.containsKey(key)) {
+                kidsMoves.put(key, entry.getValue());
             }
         }
     }
@@ -191,23 +194,9 @@ public class PlayingAgent {
 
         while (result.size() < count) {
             Map.Entry<String, List<Coordinate>> picked = entries.get(rnd.nextInt(entries.size()));
-            if (!result.containsKey(picked.getKey())) {
-                result.put(picked.getKey(), picked.getValue());
-            }
-        }
-
-        return result;
-    }
-
-    private Map<String, List<Coordinate>> pickLinearFrom(Map<String, List<Coordinate>> map, int count) {
-        Map<String, List<Coordinate>> result = new HashMap<>();
-
-        List<Map.Entry<String, List<Coordinate>>> entries = new ArrayList<>(map.entrySet());
-
-        for (int i = 0; i < count; i++) {
-            Map.Entry<String, List<Coordinate>> picked = entries.get(i);
-            if (!result.containsKey(picked.getKey())) {
-                result.put(picked.getKey(), picked.getValue());
+            String key = picked.getKey();
+            if (key != null && !result.containsKey(key)) {
+                result.put(key, picked.getValue());
             }
         }
 
@@ -221,7 +210,12 @@ public class PlayingAgent {
     public File store(final File dir, final String filename) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         File resultFile = new File(dir, filename);
-        mapper.writeValue(resultFile, this);
+        try {
+            this.moves.remove(null); // null values are not serialized!
+            mapper.writeValue(resultFile, this);
+        } catch (Exception e) {
+            System.err.println("Error!");
+        }
 
         return resultFile;
     }

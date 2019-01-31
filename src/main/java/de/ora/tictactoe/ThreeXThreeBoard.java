@@ -1,5 +1,10 @@
 package de.ora.tictactoe;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class ThreeXThreeBoard extends Board {
     public ThreeXThreeBoard(Board other) {
         super(other);
@@ -11,47 +16,38 @@ public class ThreeXThreeBoard extends Board {
 
     @Override
     protected Player findDiagonalWinner() {
-        int currentCode = Player.NONE.getCode();
-        int currentCnt = 0;
+        Map<String, List<Player>> diagonalSequences = new HashMap<>();
+        List<Player> list;
 
         for (int row = 0; row < board.data.length; row++) {
-            Integer value = board.getRawCell(row, row);
-            int intValue = value.intValue();
-            if (intValue == Player.NONE.getCode()) {
-                currentCode = Player.NONE.getCode();
-                currentCnt = 0;
-                continue;
-            }
-            if (intValue == currentCode) {
-                currentCnt++;
-                if (currentCnt == winCnt) {
-                    return Player.from(currentCode);
-                }
-            } else {
-                currentCode = intValue;
-                currentCnt = 1;
-            }
+            // full diagonal 1
+            list = diagonalSequences.computeIfAbsent("c=r", k -> new ArrayList<>());
+            list.add(Player.from(board.getRawCell(row, row)));
+
+            // full diagonal 2
+            list = diagonalSequences.computeIfAbsent("c=2-r", k -> new ArrayList<>());
+            list.add(Player.from(board.getRawCell(row, 2 - row)));
         }
 
-        currentCode = Player.NONE.getCode();
-        currentCnt = 0;
+        for (List<Player> moves : diagonalSequences.values()) {
+            Player currentPlayer = Player.NONE;
+            int currentCnt = 0;
 
-        for (int row = 0; row < board.data.length; row++) {
-            Integer value = board.getRawCell(row, 2 - row);
-            int intValue = value.intValue();
-            if (intValue == Player.NONE.getCode()) {
-                currentCode = Player.NONE.getCode();
-                currentCnt = 0;
-                continue;
-            }
-            if (intValue == currentCode) {
-                currentCnt++;
-                if (currentCnt == winCnt) {
-                    return Player.from(currentCode);
+            for (Player move : moves) {
+                if (move == Player.NONE) {
+                    currentPlayer = Player.NONE;
+                    currentCnt = 0;
+                    continue;
                 }
-            } else {
-                currentCode = intValue;
-                currentCnt = 1;
+                if (move == currentPlayer) {
+                    currentCnt++;
+                    if (currentCnt == winCnt) {
+                        return move;
+                    }
+                } else {
+                    currentPlayer = move;
+                    currentCnt = 1;
+                }
             }
         }
 

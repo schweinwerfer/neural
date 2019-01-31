@@ -9,22 +9,23 @@ import java.util.*;
 
 public class TrainerTournament extends ATournament {
 
+    private Class<? extends Board> boardType = FourXFourBoard.class;
+
     public TrainerTournament() {
-        super(new File("tournament/trainer/"));
+        super(new File("tournament/4x4/trainer/"));
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, IllegalAccessException, InstantiationException {
         TrainerTournament tournament = new TrainerTournament();
         tournament.createPopulation(POPULATION_SIZE);
         tournament.start();
     }
 
-    private void start() throws IOException {
+    private void start() throws IOException, InstantiationException, IllegalAccessException {
         boolean isRunning = true;
 
-        ThreeXThreeBoard board = new ThreeXThreeBoard();
+        Board board = boardType.newInstance();
         Trainer trainer = new Trainer(board);
-        LinearTrainer linearTrainer = new LinearTrainer(board);
         double bestScore = 0;
 
         Set<String> boardConfigs = new HashSet<>();
@@ -57,48 +58,20 @@ public class TrainerTournament extends ATournament {
                 PlayingAgent agent = population.get(i);
                 gamesPlayed = 0;
 
-//                for (String boardConfig : boardConfigs) {
-//                    Board config = Board.fromKey(boardConfig);
-//                    Player player = config.activePlayer();
-//                    Coordinate move = agent.play(player, config);
-//                    config.set(move);
-//                    Player winner = config.findWinner();
-//                    switch (winner) {
-//
-//                        case NONE:
-//                            if (config.freeCells().isEmpty()) {
-//                                agent.feedback(GameResult.DRAW);
-//                            }
-//                            break;
-//
-//                        default:
-//                            agent.feedback(winner == player ? GameResult.WON : GameResult.LOST);
-//                            break;
-//                    }
-////                    gamesPlayed++;
-//                }
 
                 for (String playConfig : playConfigs) {
                     for (int j = 0; j < 10; j++) {
-                        Board config = Board.fromKey(playConfig);
+                        Board config = Board.fromKey(boardType, playConfig);
                         Player winner = play(board, trainer, agent);
                         notifyPlayers(winner, trainer, agent);
                         gamesPlayed++;
 
-                        config = Board.fromKey(playConfig);
+                        config = Board.fromKey(boardType, playConfig);
                         winner = play(board, agent, trainer);
                         notifyPlayers(winner, agent, trainer);
                         gamesPlayed++;
                     }
                 }
-
-//                for (String playConfig : playConfigs) {
-//                    play2(playConfig, linearTrainer, agent);
-//                    gamesPlayed += 2;
-//                }
-
-
-//                LOG.info("> Agent " + i + ", games " + gamesPlayed);
             }
 
             LOG.info("Done @ " + stopwatch.toString() + ". Games played: " + gamesPlayed);
@@ -125,7 +98,7 @@ public class TrainerTournament extends ATournament {
             if (fitness > bestScore) {
                 bestScore = fitness;
                 if (bestScore > 0.99) {
-                    doAfterTournament("tournament/trainer/tmp/" + fitness);
+                    doAfterTournament("tmp/" + fitness);
                 }
             }
 
@@ -147,7 +120,7 @@ public class TrainerTournament extends ATournament {
             fillPopulation(POPULATION_SIZE);
         }
         LOG.info("Tournament done.");
-        doAfterTournament("tournament/trainer/ng2/");
+        doAfterTournament("ng");
 
     }
 
@@ -200,8 +173,8 @@ public class TrainerTournament extends ATournament {
         return Player.NONE;
     }
 
-    private void play2(String boardKey, LinearTrainer trainer, PlayingAgent opponent) {
-        Board board = Board.fromKey(boardKey);
+    private void play2(String boardKey, LinearTrainer trainer, PlayingAgent opponent) throws InstantiationException, IllegalAccessException {
+        Board board = Board.fromKey(boardType, boardKey);
         GameResultBean resultBean;
 
         while (true) {
@@ -210,7 +183,7 @@ public class TrainerTournament extends ATournament {
                 break;
             }
             if (resultBean.gameEnded) {
-                board = Board.fromKey(boardKey);
+                board = Board.fromKey(boardType, boardKey);
                 resultBean = playAndCheckMove(trainer, opponent, board);
                 if (resultBean.noMovesAvailable) {
                     break;
@@ -221,11 +194,11 @@ public class TrainerTournament extends ATournament {
                 break;
             }
             if (resultBean.gameEnded) {
-                board = Board.fromKey(boardKey);
+                board = Board.fromKey(boardType, boardKey);
             }
         }
 
-        board = Board.fromKey(boardKey);
+        board = Board.fromKey(boardType, boardKey);
         trainer.reset();
 
         while (true) {
@@ -234,14 +207,14 @@ public class TrainerTournament extends ATournament {
                 break;
             }
             if (resultBean.gameEnded) {
-                board = Board.fromKey(boardKey);
+                board = Board.fromKey(boardType, boardKey);
             }
             resultBean = playAndCheckMove(trainer, opponent, board);
             if (resultBean.noMovesAvailable) {
                 break;
             }
             if (resultBean.gameEnded) {
-                board = Board.fromKey(boardKey);
+                board = Board.fromKey(boardType, boardKey);
             }
         }
     }

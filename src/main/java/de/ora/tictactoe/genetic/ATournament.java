@@ -23,7 +23,7 @@ public abstract class ATournament {
     }
 
     protected void doAfterTournament(String s) throws IOException {
-        File agentDir2 = new File(s);
+        File agentDir2 = new File(agentDir, s);
         agentDir2.mkdirs();
         for (int i = 0; i < 20; i++) {
             PlayingAgent agent = population.get(i);
