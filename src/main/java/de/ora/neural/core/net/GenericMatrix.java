@@ -1,7 +1,6 @@
 package de.ora.neural.core.net;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 public class GenericMatrix<VALUE_T> {
     public Object[][] data;
@@ -93,6 +92,55 @@ public class GenericMatrix<VALUE_T> {
         VALUE_T oldValue = (VALUE_T) this.data[row][column];
         this.data[row][column] = value;
         return oldValue;
+    }
+
+    public GenericMatrix<VALUE_T> rotate() {
+        GenericMatrix<VALUE_T> rotated = new GenericMatrix<>(rows, columns);
+
+        final int M = rows;
+        final int N = columns;
+        for (int r = 0; r < M; r++) {
+            for (int c = 0; c < N; c++) {
+                rotated.data[c][M - 1 - r] = data[r][c];
+            }
+        }
+        return rotated;
+    }
+
+    public static int hashValue(GenericMatrix<? extends Number> matrix) {
+        int result = 0;
+        int size = matrix.size();
+        for (int i = 0; i < matrix.getRowCount(); i++) {
+            for (int j = 0; j < matrix.getColumnCount(); j++) {
+                final Number number = (Number) matrix.data[i][j];
+                --size;
+                if (number == null) {
+                    continue;
+                }
+                int intValue = number.intValue();
+                result += intValue * Math.pow(10, size);
+            }
+        }
+
+        return result;
+    }
+
+    public List<Integer> fingerprints() {
+        List<Integer> hashes = new ArrayList<>(4);
+        hashes.add(hashValue((GenericMatrix<? extends Number>) this));
+        final GenericMatrix<VALUE_T> rotate = this.rotate();
+        hashes.add(hashValue((GenericMatrix<? extends Number>) rotate));
+        final GenericMatrix<VALUE_T> rotate1 = rotate.rotate();
+        hashes.add(hashValue((GenericMatrix<? extends Number>) rotate1));
+        hashes.add(hashValue((GenericMatrix<? extends Number>) rotate1.rotate()));
+
+        Collections.sort(hashes);
+
+        return hashes;
+    }
+
+    public int size() {
+        return getRowCount() * getColumnCount();
     }
 
     @Override

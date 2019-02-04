@@ -1,5 +1,6 @@
 package de.ora.tictactoe;
 
+import de.ora.neural.core.net.GenericMatrix;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -127,6 +128,8 @@ public class ThreeXThreeBoardTest {
         Assert.assertEquals(board, createdBoard);
         Assert.assertEquals(board.activePlayer(), createdBoard.activePlayer());
     }
+
+
 
     public <T> T pickRandomItem(List<T> items) {
         return items.get(new Random().nextInt(items.size()));
