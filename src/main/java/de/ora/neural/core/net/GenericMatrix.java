@@ -107,6 +107,32 @@ public class GenericMatrix<VALUE_T> {
         return rotated;
     }
 
+    public GenericMatrix<VALUE_T> mirrorY() {
+        GenericMatrix<VALUE_T> result = new GenericMatrix<>(rows, columns);
+
+        final int M = rows;
+        final int N = columns;
+        for (int r = 0; r < M; r++) {
+            result.data[M - 1 - r] = data[r];
+        }
+
+        return result;
+    }
+
+    public GenericMatrix<VALUE_T> mirrorX() {
+        GenericMatrix<VALUE_T> result = new GenericMatrix<>(rows, columns);
+
+        final int M = rows;
+        final int N = columns;
+        for (int r = 0; r < M; r++) {
+            for (int c = 0; c < N; c++) {
+                result.data[r][N - 1 - c] = data[r][c];
+            }
+        }
+
+        return result;
+    }
+
     public static int hashValue(GenericMatrix<? extends Number> matrix) {
         int result = 0;
         int size = matrix.size();
@@ -127,12 +153,14 @@ public class GenericMatrix<VALUE_T> {
 
     public static List<Integer> fingerprints(GenericMatrix<? extends Number> matrix) {
         List<Integer> hashes = new ArrayList<>(4);
-        hashes.add(hashValue((GenericMatrix<? extends Number>) matrix));
+        hashes.add(hashValue(matrix));
         final GenericMatrix<? extends Number> rotate = matrix.rotate();
-        hashes.add(hashValue((GenericMatrix<? extends Number>) rotate));
+        hashes.add(hashValue(rotate));
         final GenericMatrix<? extends Number> rotate1 = rotate.rotate();
-        hashes.add(hashValue((GenericMatrix<? extends Number>) rotate1));
-        hashes.add(hashValue((GenericMatrix<? extends Number>) rotate1.rotate()));
+        hashes.add(hashValue(rotate1));
+        hashes.add(hashValue(rotate1.rotate()));
+        hashes.add(hashValue(matrix.mirrorX()));
+        hashes.add(hashValue(matrix.mirrorY()));
 
         Collections.sort(hashes);
 

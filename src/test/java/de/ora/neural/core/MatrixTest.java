@@ -24,7 +24,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void testMatrix() {
+    public void testRotate() {
         GenericMatrix<Integer> matrix = new GenericMatrix<>(3, 3);
         matrix.set(0, 0, 1);
         matrix.set(1, 1, 1);
@@ -36,7 +36,30 @@ public class MatrixTest {
         final GenericMatrix<Integer> rotate1 = rotate.rotate();
         final GenericMatrix<Integer> rotate2 = rotate1.rotate();
 
-        final List<Integer> fingerprints = GenericMatrix.fingerprints(matrix);
 
+    }
+
+    @Test
+    public void testMirror() {
+        GenericMatrix<Integer> matrix = new GenericMatrix<>(3, 3);
+        matrix.set(0, 0, 1);
+        matrix.set(1, 1, 1);
+        matrix.set(1, 2, 2);
+
+        final int hashValue = GenericMatrix.hashValue(matrix);
+
+        final GenericMatrix<Integer> mirrorX = matrix.mirrorX();
+        final GenericMatrix<Integer> mirrorY = matrix.mirrorY();
+
+    }
+
+    @Test
+    public void testFingerprints() {
+        GenericMatrix<Integer> matrix = new GenericMatrix<>(3, 3);
+        matrix.set(0, 0, 1);
+        matrix.set(1, 1, 1);
+        matrix.set(1, 2, 2);
+
+        final List<Integer> fingerprints = GenericMatrix.fingerprints(matrix);
     }
 }
