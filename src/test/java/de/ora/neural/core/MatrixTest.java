@@ -36,7 +36,7 @@ public class MatrixTest {
         final GenericMatrix<Integer> rotate1 = rotate.rotate();
         final GenericMatrix<Integer> rotate2 = rotate1.rotate();
 
-        final List<Integer> fingerprints = matrix.fingerprints();
+        final List<Integer> fingerprints = GenericMatrix.fingerprints(matrix);
 
     }
 }

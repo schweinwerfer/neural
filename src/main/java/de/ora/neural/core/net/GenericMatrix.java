@@ -125,12 +125,12 @@ public class GenericMatrix<VALUE_T> {
         return result;
     }
 
-    public List<Integer> fingerprints() {
+    public static List<Integer> fingerprints(GenericMatrix<? extends Number> matrix) {
         List<Integer> hashes = new ArrayList<>(4);
-        hashes.add(hashValue((GenericMatrix<? extends Number>) this));
-        final GenericMatrix<VALUE_T> rotate = this.rotate();
+        hashes.add(hashValue((GenericMatrix<? extends Number>) matrix));
+        final GenericMatrix<? extends Number> rotate = matrix.rotate();
         hashes.add(hashValue((GenericMatrix<? extends Number>) rotate));
-        final GenericMatrix<VALUE_T> rotate1 = rotate.rotate();
+        final GenericMatrix<? extends Number> rotate1 = rotate.rotate();
         hashes.add(hashValue((GenericMatrix<? extends Number>) rotate1));
         hashes.add(hashValue((GenericMatrix<? extends Number>) rotate1.rotate()));
 
