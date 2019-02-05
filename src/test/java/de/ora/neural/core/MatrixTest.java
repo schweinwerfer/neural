@@ -50,6 +50,7 @@ public class MatrixTest {
 
         final GenericMatrix<Integer> mirrorX = matrix.mirrorX();
         final GenericMatrix<Integer> mirrorY = matrix.mirrorY();
+        final GenericMatrix<Integer> mirrorD1 = matrix.mirrorD1();
 
     }
 

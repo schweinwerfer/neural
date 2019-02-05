@@ -133,6 +133,26 @@ public class GenericMatrix<VALUE_T> {
         return result;
     }
 
+    public GenericMatrix<VALUE_T> mirrorD1() {
+        GenericMatrix<VALUE_T> result = new GenericMatrix<>(rows, columns);
+
+        final int M = rows;
+        final int N = columns;
+        for (int r = 0; r < M; r++) {
+            for (int c = 0; c < N; c++) {
+                if (r == c) {
+                    // diagonale: 1:1
+                    result.data[r][c] = data[r][c];
+                } else {
+                    // spiegeln an diagonale d1
+                    result.data[c][r] = data[r][c];
+                }
+            }
+        }
+
+        return result;
+    }
+
     public static int hashValue(GenericMatrix<? extends Number> matrix) {
         int result = 0;
         int size = matrix.size();
@@ -152,15 +172,22 @@ public class GenericMatrix<VALUE_T> {
     }
 
     public static List<Integer> fingerprints(GenericMatrix<? extends Number> matrix) {
-        List<Integer> hashes = new ArrayList<>(4);
+        List<Integer> hashes = new LinkedList<>();
         hashes.add(hashValue(matrix));
-        final GenericMatrix<? extends Number> rotate = matrix.rotate();
-        hashes.add(hashValue(rotate));
-        final GenericMatrix<? extends Number> rotate1 = rotate.rotate();
-        hashes.add(hashValue(rotate1));
-        hashes.add(hashValue(rotate1.rotate()));
         hashes.add(hashValue(matrix.mirrorX()));
-        hashes.add(hashValue(matrix.mirrorY()));
+//        hashes.add(hashValue(matrix.mirrorD1()));
+        GenericMatrix<? extends Number> rotated = matrix.rotate();
+        hashes.add(hashValue(rotated));
+        hashes.add(hashValue(rotated.mirrorX()));
+//        hashes.add(hashValue(rotated.mirrorD1()));
+        rotated = rotated.rotate();
+        hashes.add(hashValue(rotated));
+        hashes.add(hashValue(rotated.mirrorX()));
+//        hashes.add(hashValue(rotated.mirrorD1()));
+        rotated = rotated.rotate();
+        hashes.add(hashValue(rotated));
+        hashes.add(hashValue(rotated.mirrorX()));
+//        hashes.add(hashValue(rotated.mirrorD1()));
 
         Collections.sort(hashes);
 
