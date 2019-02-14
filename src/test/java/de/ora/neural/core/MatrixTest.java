@@ -1,5 +1,6 @@
 package de.ora.neural.core;
 
+import de.ora.neural.core.net.Fingerprint;
 import de.ora.neural.core.net.GenericMatrix;
 import de.ora.neural.core.net.Matrix;
 import de.ora.neural.core.net.Vector;
@@ -61,6 +62,6 @@ public class MatrixTest {
         matrix.set(1, 1, 1);
         matrix.set(1, 2, 2);
 
-        final List<Integer> fingerprints = GenericMatrix.fingerprints(matrix);
+        final List<Fingerprint> fingerprints = GenericMatrix.fingerprints(matrix);
     }
 }

@@ -26,4 +26,18 @@ public class Coordinate {
     public int getColumn() {
         return column;
     }
+
+    /**
+     * @param rows number of rows of the {@link de.ora.neural.core.net.GenericMatrix}
+     */
+    public Coordinate rotate(int rows) {
+        return new Coordinate(column, rows - 1 - row);
+    }
+
+    /**
+     * @param columns number of columns of the {@link de.ora.neural.core.net.GenericMatrix}
+     */
+    public Coordinate mirrorX(int columns) {
+        return new Coordinate(row, columns - 1 - column);
+    }
 }

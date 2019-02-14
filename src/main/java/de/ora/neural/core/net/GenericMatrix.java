@@ -171,27 +171,25 @@ public class GenericMatrix<VALUE_T> {
         return result;
     }
 
-    public static List<Integer> fingerprints(GenericMatrix<? extends Number> matrix) {
-        List<Integer> hashes = new LinkedList<>();
-        hashes.add(hashValue(matrix));
-        hashes.add(hashValue(matrix.mirrorX()));
-//        hashes.add(hashValue(matrix.mirrorD1()));
+    public static List<Fingerprint> fingerprints(GenericMatrix<? extends Number> matrix) {
+        List<Fingerprint> fingerprints = new LinkedList<>();
+        final int rows = matrix.getRowCount();
+        final int columns = matrix.getColumnCount();
+        fingerprints.add(new Fingerprint(rows, columns, hashValue(matrix), FPOps.NOP));
+        fingerprints.add(new Fingerprint(rows, columns, hashValue(matrix.mirrorX()), FPOps.MX));
         GenericMatrix<? extends Number> rotated = matrix.rotate();
-        hashes.add(hashValue(rotated));
-        hashes.add(hashValue(rotated.mirrorX()));
-//        hashes.add(hashValue(rotated.mirrorD1()));
+        fingerprints.add(new Fingerprint(rows, columns, hashValue(rotated), FPOps.ROT));
+        fingerprints.add(new Fingerprint(rows, columns, hashValue(rotated.mirrorX()), FPOps.ROT, FPOps.MX));
         rotated = rotated.rotate();
-        hashes.add(hashValue(rotated));
-        hashes.add(hashValue(rotated.mirrorX()));
-//        hashes.add(hashValue(rotated.mirrorD1()));
+        fingerprints.add(new Fingerprint(rows, columns, hashValue(rotated), FPOps.ROT, FPOps.ROT));
+        fingerprints.add(new Fingerprint(rows, columns, hashValue(rotated.mirrorX()), FPOps.ROT, FPOps.ROT, FPOps.MX));
         rotated = rotated.rotate();
-        hashes.add(hashValue(rotated));
-        hashes.add(hashValue(rotated.mirrorX()));
-//        hashes.add(hashValue(rotated.mirrorD1()));
+        fingerprints.add(new Fingerprint(rows, columns, hashValue(rotated), FPOps.ROT, FPOps.ROT, FPOps.ROT));
+        fingerprints.add(new Fingerprint(rows, columns, hashValue(rotated.mirrorX()), FPOps.ROT, FPOps.ROT, FPOps.ROT, FPOps.MX));
 
-        Collections.sort(hashes);
+        Collections.sort(fingerprints);
 
-        return hashes;
+        return fingerprints;
     }
 
     public int size() {
